@@ -42,7 +42,7 @@ function updateDebug(world: UIWorld) {
   const $body = document.querySelector('#debug-body')!
   $body.innerHTML = ''
 
-  for (const note of world.state.chart.notes) {
+  for (const note of world.core.chart.notes) {
     const $tr = document.createElement('tr')
     for (const attr of ['id', 'ms', 'code', 'canHit', 'hitAt', 'hitTiming']) {
       const $td = document.createElement('td')
@@ -64,7 +64,7 @@ export function gameLoop(world: UIWorld) {
   })
 
   for (const note of newGameState.notes) {
-    const yPos = world.shell.notes[note.id].ms - world.core.ms
+    const yPos = world.shell.notes[note.id].ms - world.core.time
     world.shell.notes[note.id].$el.style.top = `${yPos / 10}px`
   }
 

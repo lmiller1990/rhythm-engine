@@ -3,7 +3,7 @@ import {
   nearestNote,
   Input,
   judge,
-  Note,
+  ChartNote,
   GameChart,
   updateGameState,
   GameNote
@@ -48,7 +48,7 @@ describe('judgeInput', () => {
       code: 'K',
       ms: 510
     }
-    const note: Note = { id: '1', code: 'K', ms: 500 }
+    const note: ChartNote = { id: '1', code: 'K', ms: 500 }
     const actual = judge(input, note)
 
     expect(actual).toBe(10)

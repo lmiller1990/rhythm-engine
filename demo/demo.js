@@ -110,7 +110,7 @@ setTimeout(function () { return (end = true); }, 20000);
 function updateDebug(world) {
     var $body = document.querySelector('#debug-body');
     $body.innerHTML = '';
-    for (var _i = 0, _a = world.state.chart.notes; _i < _a.length; _i++) {
+    for (var _i = 0, _a = world.core.chart.notes; _i < _a.length; _i++) {
         var note = _a[_i];
         var $tr = document.createElement('tr');
         for (var _b = 0, _c = ['id', 'ms', 'code', 'canHit', 'hitAt', 'hitTiming']; _b < _c.length; _b++) {
@@ -126,22 +126,24 @@ function updateDebug(world) {
 var input;
 function gameLoop(world) {
     var newGameState = updateGameState({
-        ms: world.state.ms,
-        chart: world.state.chart,
+        time: world.core.time,
+        chart: world.core.chart,
         input: input
     });
     for (var _i = 0, _a = newGameState.notes; _i < _a.length; _i++) {
         var note = _a[_i];
-        var yPos = world.notes[note.id].ms - world.state.ms;
-        world.notes[note.id].$el.style.top = yPos / 10 + "px";
+        var yPos = world.shell.notes[note.id].ms - world.core.time;
+        world.shell.notes[note.id].$el.style.top = yPos / 10 + "px";
     }
     var newWorld = {
-        state: {
-            offset: world.state.offset,
-            ms: performance.now() - world.state.offset,
+        core: {
+            offset: world.core.offset,
+            time: performance.now() - world.core.offset,
             chart: newGameState
         },
-        notes: world.notes
+        shell: {
+            notes: world.shell.notes
+        }
     };
     if (input) {
         updateDebug(newWorld);
@@ -174,12 +176,14 @@ document.querySelector('#start').addEventListener('click', function () {
     var offset = performance.now();
     initKeydownListener(offset);
     var world = {
-        state: {
-            ms: 0,
+        core: {
+            time: 0,
             chart: gameChart,
             offset: offset
         },
-        notes: notes
+        shell: {
+            notes: notes
+        }
     };
     updateDebug(world);
     requestAnimationFrame(function () { return gameLoop(world); });
