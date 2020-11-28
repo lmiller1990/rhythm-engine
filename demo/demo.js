@@ -50,6 +50,9 @@ var __assign$1 = function() {
     return __assign$1.apply(this, arguments);
 };
 
+/**
+ * Finds the "nearest" note given an input and a chart for scoring.
+ */
 function nearestNote(input, chart) {
     var nearest = chart.notes.reduce(function (best, note) {
         if (input.code === note.code &&
@@ -60,9 +63,18 @@ function nearestNote(input, chart) {
     }, chart.notes[0]);
     return nearest && nearest.code === input.code ? nearest : undefined;
 }
+/**
+ * Get the difference between the time the note should have been hit
+ * and the actual time it was hit.
+ * Useful for scoring systems.
+ */
 function judge(input, note) {
     return input.ms - note.ms;
 }
+/**
+ * Given an input and a chart, see if there is a note nearby and judge
+ * how accurately the player hit it.
+ */
 function judgeInput(input, chart) {
     var note = nearestNote(input, chart);
     if (note) {
@@ -72,6 +84,7 @@ function judgeInput(input, chart) {
         };
     }
 }
+// Create a new "world", which represents the play-through of one chart.
 function initGameState(chart) {
     return {
         notes: chart.notes.map(function (note) {
@@ -79,17 +92,23 @@ function initGameState(chart) {
         })
     };
 }
+/**
+ * Returns a new world, given an existing one and (optionally) an input.
+ * The only way the world changes is via a user input.
+ * Given X world and Y input, the new world will always be Z.
+ * That is to say the world in the engine is deterministic - no side effects.
+ *
+ * If there is no user input, the new world will be identical to the previous one.
+ */
 function updateGameState(world) {
     var judgementResult = world.input && judgeInput(world.input, world.chart);
     return {
         notes: world.chart.notes.map(function (note) {
-            var timing = judgementResult && judgementResult.noteId === note.id
-                ? judgementResult.timing
-                : undefined;
-            if (!note.canHit) {
+            var timing = judgementResult && judgementResult.noteId === note.id && judgementResult.timing;
+            if (!note.canHit || !timing) {
                 return note;
             }
-            return __assign$1(__assign$1({}, note), { hitAt: timing ? world.input.ms : note.hitAt, canHit: timing ? !timing : note.canHit, hitTiming: timing || note.hitTiming });
+            return __assign$1(__assign$1({}, note), { hitAt: world.input.ms, canHit: false, hitTiming: timing });
         })
     };
 }

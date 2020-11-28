@@ -13,7 +13,7 @@ export interface Chart {
 
 /**
  * An actual note used by the engine.
- * It has all the properties of a ChartNote, and some 
+ * It has all the properties of a ChartNote, and some
  * gameplay specific ones such as when it was hit, if it can be hit, etc.
  */
 export interface GameNote extends ChartNote {
@@ -112,7 +112,7 @@ export function initGameState(chart: Chart): GameChart {
  * The only way the world changes is via a user input.
  * Given X world and Y input, the new world will always be Z.
  * That is to say the world in the engine is deterministic - no side effects.
- * 
+ *
  * If there is no user input, the new world will be identical to the previous one.
  */
 export function updateGameState(world: World): GameChart {
@@ -121,9 +121,9 @@ export function updateGameState(world: World): GameChart {
   return {
     notes: world.chart.notes.map<GameNote>((note) => {
       const timing =
-        judgementResult && judgementResult.noteId === note.id
-          ? judgementResult.timing
-          : undefined
+        judgementResult &&
+        judgementResult.noteId === note.id &&
+        judgementResult.timing
 
       if (!note.canHit || !timing) {
         return note
