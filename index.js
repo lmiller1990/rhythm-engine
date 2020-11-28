@@ -21,7 +21,6 @@ function visualize(chart) {
 export let initOffset = 0
 
 const $elapsed = document.querySelector('#elapsed')
-const $timing = document.querySelector('#timing')
 let end = false
 
 setTimeout(() => end = true, 10000 + initOffset)
