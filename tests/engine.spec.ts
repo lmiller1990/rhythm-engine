@@ -159,7 +159,13 @@ describe('updateGameState', () => {
   })
 
   it('does not allow hitting same note twice', () => {
-    const note: GameNote = { ...baseNote, ms: 100, canHit: false, hitAt: 100, hitTiming: 0 }
+    const note: GameNote = {
+      ...baseNote,
+      ms: 100,
+      canHit: false,
+      hitAt: 100,
+      hitTiming: 0
+    }
     const current: GameChart = {
       notes: [note]
     }
