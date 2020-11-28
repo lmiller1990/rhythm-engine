@@ -1,11 +1,11 @@
 const chart = [
-  { id: 1, ms: 500, key: 'j' },
-  { id: 2, ms: 1000, key: 'k' },
-  { id: 3, ms: 2000, key: 'k' },
-  { id: 4, ms: 2500, key: 'k' },
-  { id: 5, ms: 3500, key: 'k' },
-  { id: 6, ms: 4000, key: 'k' },
-  { id: 7, ms: 5500, key: 'k' },
+  { id: 1, ms: 1000, code: 'KeyJ' },
+  { id: 2, ms: 2000, code: 'KeyK' },
+  { id: 3, ms: 3000, code: 'KeyJ' },
+  { id: 4, ms: 4000, code: 'KeyK' },
+  { id: 5, ms: 5000, code: 'KeyJ' },
+  { id: 6, ms: 6000, code: 'KeyK' },
+  { id: 7, ms: 7000, code: 'KeyJ' },
 ]
 
 function visualize(chart) {
@@ -13,7 +13,7 @@ function visualize(chart) {
   for (const note of chart) {
     const el = document.createElement('div')
     el.setAttribute('data-noteid', note.id)
-    el.innerText = `${note.ms} (${note.key})`
+    el.innerText = `${note.ms} (${note.code})`
     $chart.append(el)
   }
 }
@@ -28,17 +28,9 @@ setTimeout(() => end = true, 10000 + initOffset)
 
 let inputs = []
 
-function log({ timing, threshold }) {
-  const el = document.createElement('div')
-  const symbol = threshold === 'upper' ? '+' : '-'
-  el.innerText = `${symbol}${timing}`
-  el.className = threshold
-  $timing.append(el)
-}
-
 window.addEventListener('keydown', (event) => {
   if (event.code === 'KeyJ' || event.code === 'KeyK') {
-    inputs.push(event.timeStamp - initOffset)
+    inputs.push({ timing: event.timeStamp - initOffset, code: event.code })
   }
 })
 
@@ -51,10 +43,10 @@ function incrementMs(ms) {
   }
 }
 
-export function nearest(ms) {
+export function nearest(input) {
   let best = chart[0]
   for (const note of chart) {
-    if (Math.abs(note.ms - ms) < Math.abs(best.ms - ms)) {
+    if (input.code === note.code && Math.abs(note.ms - input.timing) < Math.abs(best.ms - input.timing)) {
       best = note
     }
   }
@@ -75,10 +67,10 @@ export function gameLoop(t0) {
     n.el.style.top = `${top/10}px`
   }
 
-  const timing = inputs.length && inputs[0] 
-  if (timing) {
-    const target = nearest(t1)
-    const diff = t1 - target.ms 
+  const input = inputs.length && inputs[0] 
+  if (input) {
+    const target = nearest(input)
+    const diff = input.timing - target.ms 
     const note = document.querySelector(`[data-noteid="${target.id}"]`)
 
     if (diff > 0) {
@@ -89,7 +81,6 @@ export function gameLoop(t0) {
       note.innerHTML += `${t1} <span class="upper">(${diff})</span>`
     }
     inputs = []
-    console.log(t0, target)
   }
 
   if (end) {
