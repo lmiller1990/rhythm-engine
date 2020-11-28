@@ -1,11 +1,5 @@
-import { fromEvent } from 'rxjs'
-import { map } from 'rxjs/operators'
 import {
-  judge,
-  nearestNote,
   Chart,
-  prettyTimeElapsed,
-  Note,
   updateGameState,
   GameChart,
   initGameState,
@@ -29,57 +23,15 @@ interface UINote extends GameNote {
   $el: HTMLDivElement
 }
 
-// function drawDebug(chart: Chart) {
-//   const $chart = document.querySelector('#chart')!
-//   for (const note of chart.notes) {
-//     const $note = document.createElement('div')
-//     $note.className = 'note__name'
-//     $note.innerText = `${note.ms} (${note.code})`
-
-//     const $el = document.createElement('div')
-//     $el.className = 'note'
-//     $el.setAttribute('data-noteid', note.id)
-//     $el.append($note)
-//     $chart.append($el)
-//   }
-// }
-
-const initOffset = 0
 let end = false
 
-setTimeout(() => (end = true), 10000 + initOffset)
-
-// fromEvent<KeyboardEvent>(window, 'keydown')
-//   .pipe(
-//     map((event) => {
-//       return {
-//         code: event.code,
-//         ms: event.timeStamp
-//       }
-//     })
-//   )
-//   .subscribe((input) => {
-//     const note = nearestNote(input, chart)
-//     if (!note) {
-//       return
-//     }
-
-//     const timing = judge(input, note)
-//     const $note = document.querySelector(`[data-noteid="${note.id}"]`)!
-
-//     // early
-//     if (timing > 0) {
-//       $note.innerHTML += `<div class="note__timing">${input.ms} <span class="note__timing--lower">(+${timing})</span></div>`
-//     } else {
-//       // late
-//       $note.innerHTML += `<div class="note__timing">${input.ms} <span class="note__timing--upper">(${timing})</span></div>`
-//     }
-//   })
+setTimeout(() => (end = true), 20000)
 
 interface UIWorld {
   state: {
     ms: number
     chart: GameChart
+    offset: number
   }
   notes: Record<string, UINote>
 }
@@ -102,15 +54,7 @@ function updateDebug(world: UIWorld) {
 
 let input: Input | undefined
 
-window.addEventListener('keydown', (event: KeyboardEvent) => {
-  if (event.code === 'KeyJ' || event.code === 'KeyK') {
-    input = { ms: event.timeStamp - initOffset, code: event.code }
-  }
-})
-
 export function gameLoop(world: UIWorld) {
-  // $elapsed.textContent = prettyTimeElapsed(world.state.ms)
-
   const newGameState = updateGameState({
     ms: world.state.ms,
     chart: world.state.chart,
@@ -124,7 +68,8 @@ export function gameLoop(world: UIWorld) {
 
   const newWorld: UIWorld = {
     state: {
-      ms: performance.now() - initOffset,
+      offset: world.state.offset,
+      ms: performance.now() - world.state.offset,
       chart: newGameState
     },
     notes: world.notes
@@ -142,7 +87,6 @@ export function gameLoop(world: UIWorld) {
   requestAnimationFrame(() => gameLoop(newWorld))
 }
 
-// drawDebug(chart)
 const gameChart = initGameState(chart)
 
 const notes: Record<string, UINote> = {}
@@ -160,15 +104,27 @@ for (const note of gameChart.notes) {
   $chart.appendChild($note)
 }
 
-setTimeout(() => {
+function initKeydownListener(offset: number) {
+  window.addEventListener('keydown', (event: KeyboardEvent) => {
+    if (event.code === 'KeyJ' || event.code === 'KeyK') {
+      input = { ms: event.timeStamp - offset, code: event.code }
+    }
+  })
+}
+
+document.querySelector('#start')!.addEventListener('click', () => {
+  const offset = performance.now()
+  initKeydownListener(offset)
+
   const world: UIWorld = {
     state: {
       ms: 0,
-      chart: gameChart
+      chart: gameChart,
+      offset
     },
     notes
   }
   updateDebug(world)
 
   requestAnimationFrame(() => gameLoop(world))
-}, initOffset)
+})

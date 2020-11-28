@@ -105,36 +105,15 @@ var chart = {
         { id: '7', ms: 7000, code: 'KeyJ' }
     ]
 };
-// function drawDebug(chart: Chart) {
-//   const $chart = document.querySelector('#chart')!
-//   for (const note of chart.notes) {
-//     const $note = document.createElement('div')
-//     $note.className = 'note__name'
-//     $note.innerText = `${note.ms} (${note.code})`
-//     const $el = document.createElement('div')
-//     $el.className = 'note'
-//     $el.setAttribute('data-noteid', note.id)
-//     $el.append($note)
-//     $chart.append($el)
-//   }
-// }
-var initOffset = 0;
 var end = false;
-setTimeout(function () { return (end = true); }, 10000 + initOffset);
+setTimeout(function () { return (end = true); }, 20000);
 function updateDebug(world) {
     var $body = document.querySelector('#debug-body');
     $body.innerHTML = '';
     for (var _i = 0, _a = world.state.chart.notes; _i < _a.length; _i++) {
         var note = _a[_i];
         var $tr = document.createElement('tr');
-        for (var _b = 0, _c = [
-            'id',
-            'ms',
-            'code',
-            'canHit',
-            'hitAt',
-            'hitTiming'
-        ]; _b < _c.length; _b++) {
+        for (var _b = 0, _c = ['id', 'ms', 'code', 'canHit', 'hitAt', 'hitTiming']; _b < _c.length; _b++) {
             var attr = _c[_b];
             var $td = document.createElement('td');
             // @ts-ignore
@@ -145,13 +124,7 @@ function updateDebug(world) {
     }
 }
 var input;
-window.addEventListener('keydown', function (event) {
-    if (event.code === 'KeyJ' || event.code === 'KeyK') {
-        input = { ms: event.timeStamp - initOffset, code: event.code };
-    }
-});
 function gameLoop(world) {
-    // $elapsed.textContent = prettyTimeElapsed(world.state.ms)
     var newGameState = updateGameState({
         ms: world.state.ms,
         chart: world.state.chart,
@@ -164,7 +137,8 @@ function gameLoop(world) {
     }
     var newWorld = {
         state: {
-            ms: performance.now() - initOffset,
+            offset: world.state.offset,
+            ms: performance.now() - world.state.offset,
             chart: newGameState
         },
         notes: world.notes
@@ -178,7 +152,6 @@ function gameLoop(world) {
     }
     requestAnimationFrame(function () { return gameLoop(newWorld); });
 }
-// drawDebug(chart)
 var gameChart = initGameState(chart);
 var notes = {};
 var $chart = document.querySelector('#chart-notes');
@@ -190,16 +163,26 @@ for (var _i = 0, _a = gameChart.notes; _i < _a.length; _i++) {
     notes[note.id] = __assign(__assign({}, note), { $el: $note });
     $chart.appendChild($note);
 }
-setTimeout(function () {
+function initKeydownListener(offset) {
+    window.addEventListener('keydown', function (event) {
+        if (event.code === 'KeyJ' || event.code === 'KeyK') {
+            input = { ms: event.timeStamp - offset, code: event.code };
+        }
+    });
+}
+document.querySelector('#start').addEventListener('click', function () {
+    var offset = performance.now();
+    initKeydownListener(offset);
     var world = {
         state: {
             ms: 0,
-            chart: gameChart
+            chart: gameChart,
+            offset: offset
         },
         notes: notes
     };
     updateDebug(world);
     requestAnimationFrame(function () { return gameLoop(world); });
-}, initOffset);
+});
 
 export { gameLoop };

@@ -1,28 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Demo</title>
   <link rel="stylesheet" href="/demo/demo.css">
 </head>
+
 <body>
-  <div id="chart-notes"></div>
-  <table id="debug">
-  <thead>
-      <tr id="debug-head">
-        <th>id</th>
-        <th>ms</th>
-        <th>code</th>
-        <th>can hit</th>
-        <th>hit at</th>
-        <th>hit timing</th>
-      </tr>
-    </thead>
-    <tbody id="debug-body">
-    </tbody>
+  <button id="start">Start</button>
+  <div id="game">
+    <div id="chart-notes"></div>
+    <table id="debug">
+      <thead>
+        <tr id="debug-head">
+          <th>id</th>
+          <th>ms</th>
+          <th>code</th>
+          <th>can hit</th>
+          <th>hit at</th>
+          <th>hit timing</th>
+        </tr>
+      </thead>
+      <tbody id="debug-body">
+      </tbody>
+  </div>
   </div>
 
   <script src="/demo/demo.js" type="module"></script>
 </body>
+
 </html>
