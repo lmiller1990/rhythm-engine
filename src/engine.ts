@@ -64,7 +64,7 @@ function judgeInput(input: Input, chart: Chart): JudgementResult | undefined {
 
 export function initGameState(chart: Chart): GameChart {
   return {
-    notes: chart.notes.map(note => {
+    notes: chart.notes.map((note) => {
       return {
         ...note,
         canHit: true,

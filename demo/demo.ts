@@ -1,6 +1,17 @@
 import { fromEvent } from 'rxjs'
 import { map } from 'rxjs/operators'
-import { judge, nearestNote, Chart, prettyTimeElapsed, Note, updateGameState, GameChart, initGameState, GameNote, Input } from '../dist'
+import {
+  judge,
+  nearestNote,
+  Chart,
+  prettyTimeElapsed,
+  Note,
+  updateGameState,
+  GameChart,
+  initGameState,
+  GameNote,
+  Input
+} from '../dist'
 
 const chart: Chart = {
   notes: [
@@ -17,7 +28,6 @@ const chart: Chart = {
 interface UINote extends GameNote {
   $el: HTMLDivElement
 }
-
 
 // function drawDebug(chart: Chart) {
 //   const $chart = document.querySelector('#chart')!
@@ -73,7 +83,6 @@ interface UIWorld {
   }
   notes: Record<string, UINote>
 }
-
 
 function updateDebug(world: UIWorld) {
   const $head = document.querySelector('#debug-head')!
@@ -133,7 +142,6 @@ export function gameLoop(world: UIWorld) {
     updateDebug(newWorld)
     console.log(world.state.chart.notes, newGameState.notes)
   }
-
 
   input = undefined
 
