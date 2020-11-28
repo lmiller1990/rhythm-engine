@@ -1,7 +1,15 @@
 {
+  "browser": "dist/rhythm-engine.browser.js",
+  "module": "dist/rhythm-engine.esm-bundler.js",
   "devDependencies": {
+    "@rollup/plugin-json": "^4.1.0",
     "jest": "^26.6.3",
+    "rollup": "^2.33.3",
+    "rollup-plugin-typescript2": "^0.29.0",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.2"
+  },
+  "scripts": {
+    "build": "yarn rollup -c rollup.config.js"
   }
 }
