@@ -75,7 +75,7 @@ function judgeInput(input, chart) {
 function initGameState(chart) {
     return {
         notes: chart.notes.map(function (note) {
-            return __assign$1(__assign$1({}, note), { canHit: true, remainingMs: note.ms });
+            return __assign$1(__assign$1({}, note), { canHit: true });
         })
     };
 }
@@ -86,7 +86,10 @@ function updateGameState(world) {
             var timing = judgementResult && judgementResult.noteId === note.id
                 ? judgementResult.timing
                 : undefined;
-            return __assign$1(__assign$1({}, note), { remainingMs: note.ms - world.ms, hitAt: timing ? world.input.ms : note.hitAt, canHit: timing ? !timing : note.canHit, hitTiming: timing || note.hitTiming });
+            if (!note.canHit) {
+                return note;
+            }
+            return __assign$1(__assign$1({}, note), { hitAt: timing ? world.input.ms : note.hitAt, canHit: timing ? !timing : note.canHit, hitTiming: timing || note.hitTiming });
         })
     };
 }
@@ -130,7 +133,6 @@ function updateDebug(world) {
             'code',
             'canHit',
             'hitAt',
-            'remainingMs',
             'hitTiming'
         ]; _b < _c.length; _b++) {
             var attr = _c[_b];
@@ -169,9 +171,8 @@ function gameLoop(world) {
     };
     if (input) {
         updateDebug(newWorld);
-        console.log(world.state.chart.notes, newGameState.notes);
+        input = undefined;
     }
-    input = undefined;
     if (end) {
         return;
     }

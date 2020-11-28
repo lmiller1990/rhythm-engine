@@ -10,7 +10,6 @@ export interface Chart {
 
 export interface GameNote extends Note {
   canHit: boolean
-  remainingMs: number
   hitTiming?: number
   hitAt?: number
 }
@@ -68,8 +67,7 @@ export function initGameState(chart: Chart): GameChart {
     notes: chart.notes.map((note) => {
       return {
         ...note,
-        canHit: true,
-        remainingMs: note.ms
+        canHit: true
       }
     })
   }
@@ -86,15 +84,11 @@ export function updateGameState(world: World): GameChart {
           : undefined
 
       if (!note.canHit) {
-        return {
-          ...note,
-          remainingMs: note.ms - world.ms
-        }
+        return note
       }
 
       return {
         ...note,
-        remainingMs: note.ms - world.ms,
         hitAt: timing ? world.input!.ms : note.hitAt,
         canHit: timing ? !timing : note.canHit,
         hitTiming: timing || note.hitTiming

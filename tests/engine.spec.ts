@@ -60,19 +60,18 @@ describe('updateGameState', () => {
     id: '1',
     ms: 0,
     code: 'J',
-    canHit: true,
-    remainingMs: 1
+    canHit: true
   }
 
   it('updates the world given relative to given millseconds', () => {
     // 900 ms has passed since game started
     const current: GameChart = {
-      notes: [{ ...baseNote, ms: 1000, remainingMs: 100 }]
+      notes: [{ ...baseNote, ms: 1000 }]
     }
 
     // 50 ms has passed since last update
     const expected: GameChart = {
-      notes: [{ ...baseNote, ms: 1000, remainingMs: 50 }]
+      notes: [{ ...baseNote, ms: 1000 }]
     }
 
     const actual = updateGameState({ chart: current, ms: 950 })
@@ -82,7 +81,7 @@ describe('updateGameState', () => {
   it('update game state considering input', () => {
     // 900 ms has passed since game started
     const current: GameChart = {
-      notes: [{ ...baseNote, ms: 1000, canHit: true, remainingMs: 100 }]
+      notes: [{ ...baseNote, ms: 1000, canHit: true }]
     }
 
     // 50 ms has passed since last update
@@ -92,7 +91,6 @@ describe('updateGameState', () => {
           ...baseNote,
           ms: 1000,
           canHit: false,
-          remainingMs: 50,
           hitTiming: -60,
           hitAt: 940
         }
@@ -118,27 +116,21 @@ describe('updateGameState', () => {
       id: '1',
       ms: 500,
       canHit: false,
-      remainingMs: 100,
       hitTiming: -100
     }
 
     const current: GameChart = {
-      notes: [
-        alreadyHitNote,
-        { ...baseNote, id: '2', ms: 1000, canHit: true, remainingMs: 600 }
-      ]
+      notes: [alreadyHitNote, { ...baseNote, id: '2', ms: 1000, canHit: true }]
     }
 
     // t = 950
     const expected: GameChart = {
       notes: [
         {
-          ...alreadyHitNote,
-          remainingMs: -450
+          ...alreadyHitNote
         },
         {
           ...current.notes[1],
-          remainingMs: 50,
           canHit: false,
           hitTiming: -50,
           hitAt: 950
@@ -171,7 +163,7 @@ describe('updateGameState', () => {
     }
 
     const expected: GameChart = {
-      notes: [{ ...note, remainingMs: 10 }]
+      notes: [{ ...note }]
     }
 
     const actual = updateGameState({
