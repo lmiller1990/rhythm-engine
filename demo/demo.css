@@ -1,0 +1,36 @@
+body {
+  /* background: black;
+  color: white; */
+  display: flex;
+}
+
+.note__timing {
+  margin: 0 5px 0 0;
+  width: 80px;
+}
+
+.note__timing--upper {
+  color: green;
+}
+
+.note__timing--lower {
+  color: red;
+}
+
+.note__vis {
+  background: skyblue;
+  height: 15px;
+  width: 15px;
+}
+
+.note {
+  display: flex;
+}
+
+.note__name {
+  width: 120px;
+}
+
+#chart-notes {
+  position: relative;
+}

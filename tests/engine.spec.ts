@@ -22,6 +22,15 @@ describe('nearestNode', () => {
 
     expect(actual).toBe(undefined)
   })
+
+  it('handles chart with no valid notes', () => {
+    const chart: Chart = {
+      notes: [{ id: '1', ms: 100, code: 'J' }]
+    }
+    const actual = nearestNote({ ms: 600, code: 'K' }, chart)
+
+    expect(actual).toBe(undefined)
+  })
 })
 
 describe('judgeInput', () => {

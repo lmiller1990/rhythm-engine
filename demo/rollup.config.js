@@ -1,31 +1,28 @@
 import ts from 'rollup-plugin-typescript2'
-import pkg from './package.json'
+import resolve from '@rollup/plugin-node-resolve'
 
-function createEntry(options) {
+export default function createEntry() {
   const config = {
-    input: './src/index.ts',
+    input: './demo/demo.ts',
     plugins: [
+      resolve(), 
       ts({
+        clean: true,
         check: true,
         tsconfigOverride: {
           compilerOptions: {
-            declaration: true,
+            declaration: false,
             target: 'es5', // not sure what this should be?
             module: 'es2015'
           },
-          exclude: ['tests', 'demo']
+          exclude: ['tests']
         }
       })
     ],
     output: {
-      file: pkg.main
+      file: './demo/demo.js'
     }
   }
 
   return config
 }
-
-
-export default [
-  createEntry({ format: 'cjs', input: 'src/index.ts', isBrowser: false }),
-]
