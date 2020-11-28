@@ -1,4 +1,4 @@
-import { Chart, nearestNote, Input, judge, Note } from "../src/engine"
+import { Chart, nearestNote, Input, judge, Note } from '../src/engine'
 
 describe('nearestNode', () => {
   it('captures nearest note based on time and input', () => {
@@ -6,7 +6,7 @@ describe('nearestNode', () => {
       notes: [
         { id: '1', ms: 0, code: 'K' },
         { id: '2', ms: 500, code: 'J' },
-        { id: '3', ms: 1000, code: 'K' },
+        { id: '3', ms: 1000, code: 'K' }
       ]
     }
     const actual = nearestNote({ ms: 600, code: 'K' }, chart)

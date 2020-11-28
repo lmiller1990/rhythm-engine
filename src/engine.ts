@@ -16,7 +16,7 @@ export interface Input {
 export function nearestNote(input: Input, chart: Chart): Note | undefined {
   const nearest = chart.notes.reduce((best, note) => {
     if (
-      input.code === note.code && 
+      input.code === note.code &&
       Math.abs(note.ms - input.ms) < Math.abs(best.ms - input.ms)
     ) {
       return note
@@ -28,5 +28,5 @@ export function nearestNote(input: Input, chart: Chart): Note | undefined {
 }
 
 export function judge(input: Input, note: Note): number {
-  return input.ms - note.ms 
+  return input.ms - note.ms
 }

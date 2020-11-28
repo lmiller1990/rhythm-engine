@@ -10,7 +10,7 @@ const chart: Chart = {
     { id: '4', ms: 4000, code: 'KeyK' },
     { id: '5', ms: 5000, code: 'KeyJ' },
     { id: '6', ms: 6000, code: 'KeyK' },
-    { id: '7', ms: 7000, code: 'KeyJ' },
+    { id: '7', ms: 7000, code: 'KeyJ' }
   ]
 }
 
@@ -34,16 +34,18 @@ function visualize(chart: Chart) {
 const initOffset = 0
 let end = false
 
-setTimeout(() => end = true, 10000 + initOffset)
+setTimeout(() => (end = true), 10000 + initOffset)
 
 fromEvent<KeyboardEvent>(window, 'keydown')
   .pipe(
-    map(event => {
+    map((event) => {
       return {
-        code: event.code, ms: event.timeStamp
+        code: event.code,
+        ms: event.timeStamp
       }
     })
-  ).subscribe(input => {
+  )
+  .subscribe((input) => {
     const note = nearestNote(input, chart)
     if (!note) {
       return
