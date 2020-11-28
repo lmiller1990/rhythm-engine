@@ -28,12 +28,14 @@ let end = false
 setTimeout(() => (end = true), 20000)
 
 interface UIWorld {
-  state: {
-    ms: number
+  core: {
+    time: number
     chart: GameChart
     offset: number
   }
-  notes: Record<string, UINote>
+  shell: {
+    notes: Record<string, UINote>
+  }
 }
 
 function updateDebug(world: UIWorld) {
@@ -56,23 +58,25 @@ let input: Input | undefined
 
 export function gameLoop(world: UIWorld) {
   const newGameState = updateGameState({
-    ms: world.state.ms,
-    chart: world.state.chart,
+    time: world.core.time,
+    chart: world.core.chart,
     input
   })
 
   for (const note of newGameState.notes) {
-    const yPos = world.notes[note.id].ms - world.state.ms
-    world.notes[note.id].$el.style.top = `${yPos / 10}px`
+    const yPos = world.shell.notes[note.id].ms - world.core.ms
+    world.shell.notes[note.id].$el.style.top = `${yPos / 10}px`
   }
 
   const newWorld: UIWorld = {
-    state: {
-      offset: world.state.offset,
-      ms: performance.now() - world.state.offset,
+    core: {
+      offset: world.core.offset,
+      time: performance.now() - world.core.offset,
       chart: newGameState
     },
-    notes: world.notes
+    shell: {
+      notes: world.shell.notes
+    }
   }
 
   if (input) {
@@ -117,12 +121,14 @@ document.querySelector('#start')!.addEventListener('click', () => {
   initKeydownListener(offset)
 
   const world: UIWorld = {
-    state: {
-      ms: 0,
+    core: {
+      time: 0,
       chart: gameChart,
       offset
     },
-    notes
+    shell: {
+      notes
+    }
   }
   updateDebug(world)
 

@@ -74,7 +74,7 @@ describe('updateGameState', () => {
       notes: [{ ...baseNote, ms: 1000 }]
     }
 
-    const actual = updateGameState({ chart: current, ms: 950 })
+    const actual = updateGameState({ chart: current, time: 950 })
     expect(actual).toEqual(expected)
   })
 
@@ -99,7 +99,7 @@ describe('updateGameState', () => {
 
     const actual = updateGameState({
       chart: current,
-      ms: 950,
+      time: 950,
       input: {
         code: baseNote.code,
         ms: 940
@@ -140,7 +140,7 @@ describe('updateGameState', () => {
 
     const actual = updateGameState({
       chart: current,
-      ms: 950,
+      time: 950,
       input: {
         code: baseNote.code,
         ms: 950
@@ -168,7 +168,7 @@ describe('updateGameState', () => {
 
     const actual = updateGameState({
       chart: current,
-      ms: 90,
+      time: 90,
       input: {
         code: note.code,
         ms: 90

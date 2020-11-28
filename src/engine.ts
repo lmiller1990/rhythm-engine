@@ -43,7 +43,7 @@ export function judge(input: Input, note: Note): number {
 
 interface World {
   chart: GameChart
-  ms: number
+  time: number
   input?: Input
 }
 
