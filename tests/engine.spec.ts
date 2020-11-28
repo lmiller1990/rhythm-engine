@@ -114,8 +114,15 @@ describe('updateGameState', () => {
     // t = 400
     const current: GameChart = {
       notes: [
-        { ...baseNote, id: '1', ms: 500, canHit: false, remainingMs: 100, hitTiming: -100 },
-        { ...baseNote, id: '2', ms: 1000, canHit: true, remainingMs: 600 },
+        {
+          ...baseNote,
+          id: '1',
+          ms: 500,
+          canHit: false,
+          remainingMs: 100,
+          hitTiming: -100
+        },
+        { ...baseNote, id: '2', ms: 1000, canHit: true, remainingMs: 600 }
       ]
     }
 
@@ -124,14 +131,14 @@ describe('updateGameState', () => {
       notes: [
         {
           ...current.notes[0],
-          remainingMs: -450,
+          remainingMs: -450
         },
         {
           ...current.notes[1],
           remainingMs: 50,
           canHit: false,
           hitTiming: -50
-        },
+        }
       ]
     }
 

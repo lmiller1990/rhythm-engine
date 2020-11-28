@@ -90,7 +90,14 @@ function updateDebug(world: UIWorld) {
 
   for (const note of world.state.chart.notes) {
     const $tr = document.createElement('tr')
-    for (const attr of ['id', 'ms', 'code', 'canHit', 'remainingMs', 'hitTiming']) {
+    for (const attr of [
+      'id',
+      'ms',
+      'code',
+      'canHit',
+      'remainingMs',
+      'hitTiming'
+    ]) {
       const $td = document.createElement('td')
       // @ts-ignore
       $td.innerText = note[attr]
