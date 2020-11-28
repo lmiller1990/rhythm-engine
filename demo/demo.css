@@ -34,4 +34,7 @@ body {
 
 #chart-notes {
   position: relative;
+  background: black;
+  height: 1px;
+  width: 100px;
 }

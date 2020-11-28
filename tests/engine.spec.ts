@@ -74,6 +74,7 @@ describe('updateGameState', () => {
     const expected: GameChart = {
       notes: [{ ...baseNote, ms: 1000, remainingMs: 50 }]
     }
+
     const actual = updateGameState({ chart: current, ms: 950 })
     expect(actual).toEqual(expected)
   })
@@ -103,6 +104,43 @@ describe('updateGameState', () => {
       input: {
         code: baseNote.code,
         ms: 940
+      }
+    })
+
+    expect(actual).toEqual(expected)
+  })
+
+  it('maintains existing state', () => {
+    // t = 400
+    const current: GameChart = {
+      notes: [
+        { ...baseNote, id: '1', ms: 500, canHit: false, remainingMs: 100, hitTiming: -100 },
+        { ...baseNote, id: '2', ms: 1000, canHit: true, remainingMs: 600 },
+      ]
+    }
+
+    // t = 950
+    const expected: GameChart = {
+      notes: [
+        {
+          ...current.notes[0],
+          remainingMs: -450,
+        },
+        {
+          ...current.notes[1],
+          remainingMs: 50,
+          canHit: false,
+          hitTiming: -50
+        },
+      ]
+    }
+
+    const actual = updateGameState({
+      chart: current,
+      ms: 950,
+      input: {
+        code: baseNote.code,
+        ms: 950
       }
     })
 

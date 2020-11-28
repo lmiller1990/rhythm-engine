@@ -85,23 +85,15 @@ interface UIWorld {
 }
 
 function updateDebug(world: UIWorld) {
-  const $head = document.querySelector('#debug-head')!
-  $head.innerHTML = ''
-
-  for (const k of Object.keys(world.state.chart.notes[0])) {
-    const $th = document.createElement('th')
-    $th.innerText = k
-    $head.appendChild($th)
-  }
-
   const $body = document.querySelector('#debug-body')!
   $body.innerHTML = ''
 
   for (const note of world.state.chart.notes) {
     const $tr = document.createElement('tr')
-    for (const v of Object.values(note)) {
+    for (const attr of ['id', 'ms', 'code', 'canHit', 'remainingMs', 'hitTiming']) {
       const $td = document.createElement('td')
-      $td.innerText = v
+      // @ts-ignore
+      $td.innerText = note[attr]
       $tr.append($td)
     }
     $body.append($tr)

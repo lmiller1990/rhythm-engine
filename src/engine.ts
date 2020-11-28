@@ -87,8 +87,8 @@ export function updateGameState(world: World): GameChart {
       return {
         ...note,
         remainingMs: note.ms - world.ms,
-        canHit: !timing,
-        hitTiming: timing
+        canHit: timing ? !timing : note.canHit,
+        hitTiming: timing || note.hitTiming
       }
     })
   }

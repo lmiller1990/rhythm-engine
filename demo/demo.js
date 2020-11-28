@@ -86,7 +86,7 @@ function updateGameState(world) {
             var timing = judgementResult && judgementResult.noteId === note.id
                 ? judgementResult.timing
                 : undefined;
-            return __assign$1(__assign$1({}, note), { remainingMs: note.ms - world.ms, canHit: !timing, hitTiming: timing });
+            return __assign$1(__assign$1({}, note), { remainingMs: note.ms - world.ms, canHit: timing ? !timing : note.canHit, hitTiming: timing || note.hitTiming });
         })
     };
 }
@@ -119,23 +119,16 @@ var initOffset = 0;
 var end = false;
 setTimeout(function () { return (end = true); }, 10000 + initOffset);
 function updateDebug(world) {
-    var $head = document.querySelector('#debug-head');
-    $head.innerHTML = '';
-    for (var _i = 0, _a = Object.keys(world.state.chart.notes[0]); _i < _a.length; _i++) {
-        var k = _a[_i];
-        var $th = document.createElement('th');
-        $th.innerText = k;
-        $head.appendChild($th);
-    }
     var $body = document.querySelector('#debug-body');
     $body.innerHTML = '';
-    for (var _b = 0, _c = world.state.chart.notes; _b < _c.length; _b++) {
-        var note = _c[_b];
+    for (var _i = 0, _a = world.state.chart.notes; _i < _a.length; _i++) {
+        var note = _a[_i];
         var $tr = document.createElement('tr');
-        for (var _d = 0, _e = Object.values(note); _d < _e.length; _d++) {
-            var v = _e[_d];
+        for (var _b = 0, _c = ['id', 'ms', 'code', 'canHit', 'remainingMs', 'hitTiming']; _b < _c.length; _b++) {
+            var attr = _c[_b];
             var $td = document.createElement('td');
-            $td.innerText = v;
+            // @ts-ignore
+            $td.innerText = note[attr];
             $tr.append($td);
         }
         $body.append($tr);
