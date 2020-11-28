@@ -104,11 +104,13 @@ function updateGameState(world) {
     var judgementResult = world.input && judgeInput(world.input, world.chart);
     return {
         notes: world.chart.notes.map(function (note) {
-            var timing = judgementResult && judgementResult.noteId === note.id && judgementResult.timing;
-            if (!note.canHit || !timing) {
+            if (!note.canHit || !judgementResult) {
                 return note;
             }
-            return __assign$1(__assign$1({}, note), { hitAt: world.input.ms, canHit: false, hitTiming: timing });
+            if (judgementResult.noteId === note.id) {
+                return __assign$1(__assign$1({}, note), { hitAt: world.input.ms, canHit: false, hitTiming: judgementResult.timing });
+            }
+            return note;
         })
     };
 }

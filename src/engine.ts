@@ -120,21 +120,20 @@ export function updateGameState(world: World): GameChart {
 
   return {
     notes: world.chart.notes.map<GameNote>((note) => {
-      const timing =
-        judgementResult &&
-        judgementResult.noteId === note.id &&
-        judgementResult.timing
-
-      if (!note.canHit || !timing) {
+      if (!note.canHit || !judgementResult) {
         return note
       }
 
-      return {
-        ...note,
-        hitAt: world.input!.ms,
-        canHit: false,
-        hitTiming: timing
+      if (judgementResult.noteId === note.id) {
+        return {
+          ...note,
+          hitAt: world.input!.ms,
+          canHit: false,
+          hitTiming: judgementResult.timing
+        }
       }
+
+      return note
     })
   }
 }
