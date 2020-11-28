@@ -8,6 +8,16 @@ export interface Chart {
   notes: Note[]
 }
 
+export interface GameNote extends Note {
+  canHit: boolean
+  remainingMs: number
+  hitTiming?: number
+}
+
+export interface GameChart {
+  notes: GameNote[]
+}
+
 export interface Input {
   ms: number
   code: string
@@ -29,4 +39,57 @@ export function nearestNote(input: Input, chart: Chart): Note | undefined {
 
 export function judge(input: Input, note: Note): number {
   return input.ms - note.ms
+}
+
+interface World {
+  chart: GameChart
+  ms: number
+  input?: Input
+}
+
+interface JudgementResult {
+  noteId: string
+  timing: number
+}
+
+function judgeInput(input: Input, chart: Chart): JudgementResult | undefined {
+  const note = nearestNote(input, chart)
+  if (note) {
+    return {
+      timing: judge(input, note),
+      noteId: note.id
+    }
+  }
+}
+
+export function initGameState(chart: Chart): GameChart {
+  return {
+    notes: chart.notes.map(note => {
+      return {
+        ...note,
+        canHit: true,
+        remainingMs: note.ms
+      }
+    })
+  }
+}
+
+export function updateGameState(world: World): GameChart {
+  const judgementResult = world.input && judgeInput(world.input, world.chart)
+
+  return {
+    notes: world.chart.notes.map<GameNote>((note) => {
+      const timing =
+        judgementResult && judgementResult.noteId === note.id
+          ? judgementResult.timing
+          : undefined
+
+      return {
+        ...note,
+        remainingMs: note.ms - world.ms,
+        canHit: !timing,
+        hitTiming: timing
+      }
+    })
+  }
 }

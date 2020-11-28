@@ -17,9 +17,10 @@ body {
   color: red;
 }
 
-.note__vis {
+.ui-note {
   background: skyblue;
   height: 15px;
+  position: absolute;
   width: 15px;
 }
 
