@@ -95,6 +95,7 @@ function updateDebug(world: UIWorld) {
       'ms',
       'code',
       'canHit',
+      'hitAt',
       'remainingMs',
       'hitTiming'
     ]) {
@@ -139,10 +140,8 @@ export function gameLoop(world: UIWorld) {
 
   if (input) {
     updateDebug(newWorld)
-    console.log(world.state.chart.notes, newGameState.notes)
+    input = undefined
   }
-
-  input = undefined
 
   if (end) {
     return

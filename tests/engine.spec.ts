@@ -93,7 +93,8 @@ describe('updateGameState', () => {
           ms: 1000,
           canHit: false,
           remainingMs: 50,
-          hitTiming: -60
+          hitTiming: -60,
+          hitAt: 940
         }
       ]
     }
@@ -112,16 +113,18 @@ describe('updateGameState', () => {
 
   it('maintains existing state', () => {
     // t = 400
+    const alreadyHitNote: GameNote = {
+      ...baseNote,
+      id: '1',
+      ms: 500,
+      canHit: false,
+      remainingMs: 100,
+      hitTiming: -100
+    }
+
     const current: GameChart = {
       notes: [
-        {
-          ...baseNote,
-          id: '1',
-          ms: 500,
-          canHit: false,
-          remainingMs: 100,
-          hitTiming: -100
-        },
+        alreadyHitNote,
         { ...baseNote, id: '2', ms: 1000, canHit: true, remainingMs: 600 }
       ]
     }
@@ -130,14 +133,15 @@ describe('updateGameState', () => {
     const expected: GameChart = {
       notes: [
         {
-          ...current.notes[0],
+          ...alreadyHitNote,
           remainingMs: -450
         },
         {
           ...current.notes[1],
           remainingMs: 50,
           canHit: false,
-          hitTiming: -50
+          hitTiming: -50,
+          hitAt: 950
         }
       ]
     }
@@ -148,6 +152,28 @@ describe('updateGameState', () => {
       input: {
         code: baseNote.code,
         ms: 950
+      }
+    })
+
+    expect(actual).toEqual(expected)
+  })
+
+  it('does not allow hitting same note twice', () => {
+    const note: GameNote = { ...baseNote, ms: 100, canHit: false, hitAt: 100, hitTiming: 0 }
+    const current: GameChart = {
+      notes: [note]
+    }
+
+    const expected: GameChart = {
+      notes: [{ ...note, remainingMs: 10 }]
+    }
+
+    const actual = updateGameState({
+      chart: current,
+      ms: 90,
+      input: {
+        code: note.code,
+        ms: 90
       }
     })
 

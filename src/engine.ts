@@ -12,6 +12,7 @@ export interface GameNote extends Note {
   canHit: boolean
   remainingMs: number
   hitTiming?: number
+  hitAt?: number
 }
 
 export interface GameChart {
@@ -84,9 +85,17 @@ export function updateGameState(world: World): GameChart {
           ? judgementResult.timing
           : undefined
 
+      if (!note.canHit) {
+        return {
+          ...note,
+          remainingMs: note.ms - world.ms
+        }
+      }
+
       return {
         ...note,
         remainingMs: note.ms - world.ms,
+        hitAt: timing ? world.input!.ms : note.hitAt,
         canHit: timing ? !timing : note.canHit,
         hitTiming: timing || note.hitTiming
       }

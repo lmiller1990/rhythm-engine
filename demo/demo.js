@@ -86,7 +86,7 @@ function updateGameState(world) {
             var timing = judgementResult && judgementResult.noteId === note.id
                 ? judgementResult.timing
                 : undefined;
-            return __assign$1(__assign$1({}, note), { remainingMs: note.ms - world.ms, canHit: timing ? !timing : note.canHit, hitTiming: timing || note.hitTiming });
+            return __assign$1(__assign$1({}, note), { remainingMs: note.ms - world.ms, hitAt: timing ? world.input.ms : note.hitAt, canHit: timing ? !timing : note.canHit, hitTiming: timing || note.hitTiming });
         })
     };
 }
@@ -124,7 +124,15 @@ function updateDebug(world) {
     for (var _i = 0, _a = world.state.chart.notes; _i < _a.length; _i++) {
         var note = _a[_i];
         var $tr = document.createElement('tr');
-        for (var _b = 0, _c = ['id', 'ms', 'code', 'canHit', 'remainingMs', 'hitTiming']; _b < _c.length; _b++) {
+        for (var _b = 0, _c = [
+            'id',
+            'ms',
+            'code',
+            'canHit',
+            'hitAt',
+            'remainingMs',
+            'hitTiming'
+        ]; _b < _c.length; _b++) {
             var attr = _c[_b];
             var $td = document.createElement('td');
             // @ts-ignore
