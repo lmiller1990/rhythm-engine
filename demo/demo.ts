@@ -10,25 +10,32 @@ import {
 const bpm = 120
 
 
+const randomKey = () => {
+  const seed = Math.random()
+  if (seed < 0.25) {
+    return 'KeyD'
+  }
+  if (seed >= 0.25 && seed < 0.5) {
+    return 'KeyF'
+  }
+  if (seed >= 0.5 && seed < 0.75) {
+    return 'KeyJ'
+  }
+  if (seed >= 0.75) {
+    return 'KeyK'
+  }
+  throw Error(`${seed} is invalid`)
+}
+
 const delay = 2000
 const chart: Chart = {
-  notes: new Array(50).fill(0).map((_, idx) => {
+  notes: new Array(30).fill(0).map((_, idx) => {
     return {
       id: (idx + 1).toString(),
       ms: (1000 / (bpm / 60) * idx) + 230 + delay,
-      code: 'KeyJ'
+      code: randomKey()
     }
   })
-
-  //  [
-  //   { id: '1', ms: 1000, code: 'KeyJ' },
-  //   { id: '2', ms: 2000, code: 'KeyK' },
-  //   { id: '3', ms: 3000, code: 'KeyJ' },
-  //   { id: '4', ms: 4000, code: 'KeyK' },
-  //   { id: '5', ms: 5000, code: 'KeyJ' },
-  //   { id: '6', ms: 6000, code: 'KeyK' },
-  //   { id: '7', ms: 7000, code: 'KeyJ' }
-  // ]
 }
 
 interface UINote extends GameNote {
@@ -37,7 +44,7 @@ interface UINote extends GameNote {
 
 let end = false
 
-setTimeout(() => (end = true), 30000)
+setTimeout(() => (end = true), 20000)
 
 interface UIWorld {
   core: {
@@ -50,13 +57,28 @@ interface UIWorld {
   }
 }
 
+let first = true
+
 function updateDebug(world: UIWorld) {
   const $body = document.querySelector('#debug-body')!
   $body.innerHTML = ''
+  const hide = ['canHit', 'hitAt']
+
+  if (first) {
+    for (const attr of hide) {
+      const $th = document.querySelector(`[data-debugid="${attr}"]`)!
+      $th.remove()
+    }
+    first = false
+  }
 
   for (const note of world.core.chart.notes) {
     const $tr = document.createElement('tr')
-    for (const attr of ['id', 'ms', 'code', 'canHit', 'hitAt', 'hitTiming']) {
+    for (const attr of ['id', 'hitTiming', 'code', 'ms', 'canHit', 'hitAt']) {
+      if (hide.includes(attr)) {
+        continue
+      }
+
       const $td = document.createElement('td')
       // @ts-ignore
       $td.innerText = note[attr]
@@ -114,6 +136,13 @@ for (const note of gameChart.notes) {
   const $note = document.createElement('div')
   $note.className = 'ui-note'
   $note.style.top = `${Math.round(note.ms / 10)}px`
+  $note.style.left = (() => {
+    if (note.code === 'KeyD') return '0px'
+    if (note.code === 'KeyF') return '25px'
+    if (note.code === 'KeyJ') return '50px'
+    if (note.code === 'KeyK') return '75px'
+    return ''
+  })()
   notes[note.id] = {
     ...note,
     $el: $note
@@ -123,7 +152,7 @@ for (const note of gameChart.notes) {
 
 function initKeydownListener(offset: number) {
   window.addEventListener('keydown', (event: KeyboardEvent) => {
-    if (event.code === 'KeyJ' || event.code === 'KeyK') {
+    if (event.code === 'KeyJ' || event.code === 'KeyK' || event.code === 'KeyD' || event.code === 'KeyF') {
       input = { ms: event.timeStamp - offset, code: event.code }
     }
   })

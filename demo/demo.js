@@ -116,35 +116,55 @@ function updateGameState(world) {
 }
 
 var bpm = 120;
+var randomKey = function () {
+    var seed = Math.random();
+    if (seed < 0.25) {
+        return 'KeyD';
+    }
+    if (seed >= 0.25 && seed < 0.5) {
+        return 'KeyF';
+    }
+    if (seed >= 0.5 && seed < 0.75) {
+        return 'KeyJ';
+    }
+    if (seed >= 0.75) {
+        return 'KeyK';
+    }
+    throw Error(seed + " is invalid");
+};
 var delay = 2000;
 var chart = {
-    notes: new Array(50).fill(0).map(function (_, idx) {
+    notes: new Array(30).fill(0).map(function (_, idx) {
         return {
             id: (idx + 1).toString(),
             ms: (1000 / (bpm / 60) * idx) + 230 + delay,
-            code: 'KeyJ'
+            code: randomKey()
         };
     })
-    //  [
-    //   { id: '1', ms: 1000, code: 'KeyJ' },
-    //   { id: '2', ms: 2000, code: 'KeyK' },
-    //   { id: '3', ms: 3000, code: 'KeyJ' },
-    //   { id: '4', ms: 4000, code: 'KeyK' },
-    //   { id: '5', ms: 5000, code: 'KeyJ' },
-    //   { id: '6', ms: 6000, code: 'KeyK' },
-    //   { id: '7', ms: 7000, code: 'KeyJ' }
-    // ]
 };
 var end = false;
-setTimeout(function () { return (end = true); }, 30000);
+setTimeout(function () { return (end = true); }, 20000);
+var first = true;
 function updateDebug(world) {
     var $body = document.querySelector('#debug-body');
     $body.innerHTML = '';
-    for (var _i = 0, _a = world.core.chart.notes; _i < _a.length; _i++) {
-        var note = _a[_i];
+    var hide = ['canHit', 'hitAt'];
+    if (first) {
+        for (var _i = 0, hide_1 = hide; _i < hide_1.length; _i++) {
+            var attr = hide_1[_i];
+            var $th = document.querySelector("[data-debugid=\"" + attr + "\"]");
+            $th.remove();
+        }
+        first = false;
+    }
+    for (var _a = 0, _b = world.core.chart.notes; _a < _b.length; _a++) {
+        var note = _b[_a];
         var $tr = document.createElement('tr');
-        for (var _b = 0, _c = ['id', 'ms', 'code', 'canHit', 'hitAt', 'hitTiming']; _b < _c.length; _b++) {
-            var attr = _c[_b];
+        for (var _c = 0, _d = ['id', 'hitTiming', 'code', 'ms', 'canHit', 'hitAt']; _c < _d.length; _c++) {
+            var attr = _d[_c];
+            if (hide.includes(attr)) {
+                continue;
+            }
             var $td = document.createElement('td');
             // @ts-ignore
             $td.innerText = note[attr];
@@ -188,17 +208,31 @@ function gameLoop(world) {
 var gameChart = initGameState(chart);
 var notes = {};
 var $chart = document.querySelector('#chart-notes');
-for (var _i = 0, _a = gameChart.notes; _i < _a.length; _i++) {
-    var note = _a[_i];
+var _loop_1 = function (note) {
     var $note = document.createElement('div');
     $note.className = 'ui-note';
     $note.style.top = Math.round(note.ms / 10) + "px";
+    $note.style.left = (function () {
+        if (note.code === 'KeyD')
+            return '0px';
+        if (note.code === 'KeyF')
+            return '25px';
+        if (note.code === 'KeyJ')
+            return '50px';
+        if (note.code === 'KeyK')
+            return '75px';
+        return '';
+    })();
     notes[note.id] = __assign(__assign({}, note), { $el: $note });
     $chart.appendChild($note);
+};
+for (var _i = 0, _a = gameChart.notes; _i < _a.length; _i++) {
+    var note = _a[_i];
+    _loop_1(note);
 }
 function initKeydownListener(offset) {
     window.addEventListener('keydown', function (event) {
-        if (event.code === 'KeyJ' || event.code === 'KeyK') {
+        if (event.code === 'KeyJ' || event.code === 'KeyK' || event.code === 'KeyD' || event.code === 'KeyF') {
             input = { ms: event.timeStamp - offset, code: event.code };
         }
     });
