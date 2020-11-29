@@ -1,26 +1,26 @@
 /**
  * Represents the abstract idea of a Note, for example in a note chart you load from a text file, etc.
  */
-export interface ChartNote {
+export interface ChartNote<Code = string> {
   id: string
   ms: number
-  code: string
+  code: Code
 }
 
-export interface Chart {
-  notes: ChartNote[]
+export interface Chart<Code = string> {
+  notes: ChartNote<Code>[]
 }
 
-interface CreateChart {
+interface CreateChart<Code = string> {
   offset: number
-  notes: ChartNote[]
+  notes: ChartNote<Code>[]
 }
 
 /**
  * Creates a new chart.
  * Handles things like offsetting the notes.
  */
-export function createChart(args: CreateChart): Chart {
+export function createChart<Code = string>(args: CreateChart<Code>): Chart<Code> {
   return {
     notes: args.notes.map((note) => {
       return {

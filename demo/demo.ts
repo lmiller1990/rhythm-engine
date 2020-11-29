@@ -133,7 +133,9 @@ for (const note of gameChart.notes) {
 
 function initKeydownListener(offset: number) {
   window.addEventListener('keydown', (event: KeyboardEvent) => {
-    event.preventDefault()
+    if (event.code === 'Slash') {
+      event.preventDefault()
+    }
     const code = mapping[event.code]
     if (!code) {
       return
