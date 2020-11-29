@@ -1,57 +1,11 @@
 import {
-  Chart,
   updateGameState,
   GameChart,
   initGameState,
   GameNote,
   Input,
-  createChart
 } from '../dist'
-
-const bpm = 175
-
-const randomKey = () => {
-  const seed = Math.random()
-  if (seed < 0.25) {
-    return 'KeyD'
-  }
-  if (seed >= 0.25 && seed < 0.5) {
-    return 'KeyF'
-  }
-  if (seed >= 0.5 && seed < 0.75) {
-    return 'KeyJ'
-  }
-  if (seed >= 0.75) {
-    return 'KeyK'
-  }
-  throw Error(`${seed} is invalid`)
-}
-
-const songOffset = 2000
-const chartOffset = 2150
-
-const uberRave: Chart = createChart({
-  offset: chartOffset,
-  notes: [
-    { id: '1', ms: 0, code: 'KeyJ' },
-    { id: '2', ms: 334, code: 'KeyK' },
-    { id: '3', ms: 713, code: 'KeyJ'},
-    { id: '4', ms: 1029, code: 'KeyJ' },
-    { id: '5', ms: 1029, code: 'KeyK' },
-  ]
-})
-
-const chart: Chart = createChart({
-  offset: chartOffset,
-  notes: new Array(30).fill(0).map((_, idx) => {
-    const ms = Math.round((1000 / (bpm / 60)) * idx)
-    return {
-      id: (idx + 1).toString(),
-      ms,
-      code: randomKey()
-    }
-  })
-})
+import { uberRave } from './charts'
 
 interface UINote extends GameNote {
   $el: HTMLDivElement
@@ -60,6 +14,15 @@ interface UINote extends GameNote {
 let end = false
 
 setTimeout(() => (end = true), 20000)
+
+export type Column = '1' | '2' | '3' | '4'
+
+const mapping: Record<'KeyM' | 'Comma' | 'Period' | 'Slash' | string, Column> = {
+  'KeyM': '1',
+  'Comma': '2',
+  'Period': '3',
+  'Slash': '4',
+}
 
 interface UIWorld {
   core: {
@@ -106,6 +69,7 @@ function updateDebug(world: UIWorld) {
 let inputs: Input[] = []
 let playing = false
 const SPEED_MOD = 2
+const songOffset = 2000
 
 export function gameLoop(world: UIWorld) {
   const time = performance.now()
@@ -159,13 +123,7 @@ for (const note of gameChart.notes) {
   const $note = document.createElement('div')
   $note.className = 'ui-note'
   $note.style.top = `${Math.round(note.ms / SPEED_MOD)}px`
-  $note.style.left = (() => {
-    if (note.code === 'KeyD') return '0px'
-    if (note.code === 'KeyF') return '25px'
-    if (note.code === 'KeyJ') return '50px'
-    if (note.code === 'KeyK') return '75px'
-    return ''
-  })()
+  $note.style.left = `${(parseInt(note.code) - 1) * 25}px`
   notes[note.id] = {
     ...note,
     $el: $note
@@ -175,14 +133,13 @@ for (const note of gameChart.notes) {
 
 function initKeydownListener(offset: number) {
   window.addEventListener('keydown', (event: KeyboardEvent) => {
-    if (
-      event.code === 'KeyJ' ||
-      event.code === 'KeyK' ||
-      event.code === 'KeyD' ||
-      event.code === 'KeyF'
-    ) {
-      inputs.push({ ms: event.timeStamp - offset, code: event.code })
+    event.preventDefault()
+    const code = mapping[event.code]
+    if (!code) {
+      return
     }
+
+    inputs.push({ ms: event.timeStamp - offset, code })
   })
 }
 

@@ -134,35 +134,18 @@ function updateGameState(world) {
     };
 }
 
-var bpm = 175;
-var randomKey = function () {
-    var seed = Math.random();
-    if (seed < 0.25) {
-        return 'KeyD';
-    }
-    if (seed >= 0.25 && seed < 0.5) {
-        return 'KeyF';
-    }
-    if (seed >= 0.5 && seed < 0.75) {
-        return 'KeyJ';
-    }
-    if (seed >= 0.75) {
-        return 'KeyK';
-    }
-    throw Error(seed + " is invalid");
-};
-var songOffset = 2000;
 var chartOffset = 2150;
 var uberRave = createChart({
     offset: chartOffset,
     notes: [
-        { id: '1', ms: 0, code: 'KeyJ' },
-        { id: '2', ms: 334, code: 'KeyK' },
-        { id: '3', ms: 713, code: 'KeyJ' },
-        { id: '4', ms: 1029, code: 'KeyJ' },
-        { id: '5', ms: 1029, code: 'KeyK' },
+        { id: '1', ms: 0, code: '1' },
+        { id: '2', ms: 334, code: '2' },
+        { id: '3', ms: 713, code: '1' },
+        { id: '4', ms: 1029, code: '2' },
+        { id: '5', ms: 1029, code: '1' },
     ]
 });
+var bpm = 175;
 var chart = createChart({
     offset: chartOffset,
     notes: new Array(30).fill(0).map(function (_, idx) {
@@ -170,12 +153,19 @@ var chart = createChart({
         return {
             id: (idx + 1).toString(),
             ms: ms,
-            code: randomKey()
+            code: '1'
         };
     })
 });
+
 var end = false;
 setTimeout(function () { return (end = true); }, 20000);
+var mapping = {
+    'KeyM': '1',
+    'Comma': '2',
+    'Period': '3',
+    'Slash': '4',
+};
 var first = true;
 function updateDebug(world) {
     var $body = document.querySelector('#debug-body');
@@ -208,6 +198,7 @@ function updateDebug(world) {
 var inputs = [];
 var playing = false;
 var SPEED_MOD = 2;
+var songOffset = 2000;
 function gameLoop(world) {
     var time = performance.now();
     if (!playing && time - world.core.offset >= songOffset) {
@@ -247,36 +238,23 @@ function gameLoop(world) {
 var gameChart = initGameState(uberRave);
 var notes = {};
 var $chart = document.querySelector('#chart-notes');
-var _loop_1 = function (note) {
+for (var _i = 0, _a = gameChart.notes; _i < _a.length; _i++) {
+    var note = _a[_i];
     var $note = document.createElement('div');
     $note.className = 'ui-note';
     $note.style.top = Math.round(note.ms / SPEED_MOD) + "px";
-    $note.style.left = (function () {
-        if (note.code === 'KeyD')
-            return '0px';
-        if (note.code === 'KeyF')
-            return '25px';
-        if (note.code === 'KeyJ')
-            return '50px';
-        if (note.code === 'KeyK')
-            return '75px';
-        return '';
-    })();
+    $note.style.left = (parseInt(note.code) - 1) * 25 + "px";
     notes[note.id] = __assign(__assign({}, note), { $el: $note });
     $chart.appendChild($note);
-};
-for (var _i = 0, _a = gameChart.notes; _i < _a.length; _i++) {
-    var note = _a[_i];
-    _loop_1(note);
 }
 function initKeydownListener(offset) {
     window.addEventListener('keydown', function (event) {
-        if (event.code === 'KeyJ' ||
-            event.code === 'KeyK' ||
-            event.code === 'KeyD' ||
-            event.code === 'KeyF') {
-            inputs.push({ ms: event.timeStamp - offset, code: event.code });
+        event.preventDefault();
+        var code = mapping[event.code];
+        if (!code) {
+            return;
         }
+        inputs.push({ ms: event.timeStamp - offset, code: code });
     });
 }
 var audio = document.createElement('audio');
