@@ -11,6 +11,26 @@ export interface Chart {
   notes: ChartNote[]
 }
 
+interface CreateChart {
+  offset: number
+  notes: ChartNote[]
+}
+
+/**
+ * Creates a new chart.
+ * Handles things like offsetting the notes.
+ */
+export function createChart(args: CreateChart): Chart {
+  return {
+    notes: args.notes.map((note) => {
+      return {
+        ...note,
+        ms: note.ms + args.offset
+      }
+    })
+  }
+}
+
 /**
  * An actual note used by the engine.
  * It has all the properties of a ChartNote, and some

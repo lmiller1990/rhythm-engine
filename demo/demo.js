@@ -51,6 +51,17 @@ var __assign$1 = function() {
 };
 
 /**
+ * Creates a new chart.
+ * Handles things like offsetting the notes.
+ */
+function createChart(args) {
+    return {
+        notes: args.notes.map(function (note) {
+            return __assign$1(__assign$1({}, note), { ms: note.ms + args.offset });
+        })
+    };
+}
+/**
  * Finds the "nearest" note given an input and a chart for scoring.
  */
 function nearestNote(input, chart) {
@@ -115,7 +126,7 @@ function updateGameState(world) {
     };
 }
 
-var bpm = 120;
+var bpm = 175;
 var randomKey = function () {
     var seed = Math.random();
     if (seed < 0.25) {
@@ -132,16 +143,19 @@ var randomKey = function () {
     }
     throw Error(seed + " is invalid");
 };
-var delay = 2000;
-var chart = {
+var songOffset = 2000;
+var chartOffset = 2150;
+var chart = createChart({
+    offset: chartOffset,
     notes: new Array(30).fill(0).map(function (_, idx) {
+        var ms = Math.round((1000 / (bpm / 60) * idx));
         return {
             id: (idx + 1).toString(),
-            ms: (1000 / (bpm / 60) * idx) + 230 + delay,
+            ms: ms,
             code: randomKey()
         };
     })
-};
+});
 var end = false;
 setTimeout(function () { return (end = true); }, 20000);
 var first = true;
@@ -174,9 +188,15 @@ function updateDebug(world) {
     }
 }
 var input;
+var playing = false;
 function gameLoop(world) {
+    var time = performance.now();
+    if (!playing && time - world.core.offset >= songOffset) {
+        audio.play();
+        playing = true;
+    }
     var newGameState = updateGameState({
-        time: performance.now(),
+        time: time,
         chart: world.core.chart,
         input: input
     });
@@ -242,9 +262,7 @@ document.querySelector('#end').addEventListener('click', function () {
     end = true;
 });
 document.querySelector('#start').addEventListener('click', function () {
-    // audio.src = 'http://localhost:8000/noxik-hotline.mp3'
-    audio.src = 'http://localhost:8000/120.mp3';
-    audio.play();
+    audio.src = '/uber-rave.mp3';
     var offset = performance.now();
     initKeydownListener(offset);
     var world = {

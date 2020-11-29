@@ -4,11 +4,11 @@ import {
   GameChart,
   initGameState,
   GameNote,
-  Input
+  Input,
+  createChart
 } from '../dist'
 
-const bpm = 120
-
+const bpm = 175
 
 const randomKey = () => {
   const seed = Math.random()
@@ -27,16 +27,20 @@ const randomKey = () => {
   throw Error(`${seed} is invalid`)
 }
 
-const delay = 2000
-const chart: Chart = {
+const songOffset = 2000
+const chartOffset = 2150
+
+const chart: Chart = createChart({
+  offset: chartOffset,
   notes: new Array(30).fill(0).map((_, idx) => {
+    const ms = Math.round((1000 / (bpm / 60)) * idx)
     return {
       id: (idx + 1).toString(),
-      ms: (1000 / (bpm / 60) * idx) + 230 + delay,
+      ms,
       code: randomKey()
     }
   })
-}
+})
 
 interface UINote extends GameNote {
   $el: HTMLDivElement
@@ -89,10 +93,17 @@ function updateDebug(world: UIWorld) {
 }
 
 let input: Input | undefined
+let playing = false
 
 export function gameLoop(world: UIWorld) {
+  const time = performance.now()
+  if (!playing && time - world.core.offset >= songOffset) {
+    audio.play()
+    playing = true
+  }
+
   const newGameState = updateGameState({
-    time: performance.now(), // world.core.time,
+    time,
     chart: world.core.chart,
     input
   })
@@ -152,7 +163,12 @@ for (const note of gameChart.notes) {
 
 function initKeydownListener(offset: number) {
   window.addEventListener('keydown', (event: KeyboardEvent) => {
-    if (event.code === 'KeyJ' || event.code === 'KeyK' || event.code === 'KeyD' || event.code === 'KeyF') {
+    if (
+      event.code === 'KeyJ' ||
+      event.code === 'KeyK' ||
+      event.code === 'KeyD' ||
+      event.code === 'KeyF'
+    ) {
       input = { ms: event.timeStamp - offset, code: event.code }
     }
   })
@@ -164,9 +180,7 @@ document.querySelector('#end')!.addEventListener('click', () => {
 })
 
 document.querySelector('#start')!.addEventListener('click', () => {
-  // audio.src = 'http://localhost:8000/noxik-hotline.mp3'
-  audio.src = 'http://localhost:8000/120.mp3'
-  audio.play()
+  audio.src = '/resources/uber-rave.mp3'
 
   const offset = performance.now()
   initKeydownListener(offset)
@@ -185,5 +199,3 @@ document.querySelector('#start')!.addEventListener('click', () => {
 
   requestAnimationFrame(() => gameLoop(world))
 })
-
-

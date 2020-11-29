@@ -6,7 +6,8 @@ import {
   ChartNote,
   GameChart,
   updateGameState,
-  GameNote
+  GameNote,
+  createChart
 } from '../src/engine'
 
 describe('nearestNode', () => {
@@ -173,6 +174,20 @@ describe('updateGameState', () => {
         code: note.code,
         ms: 90
       }
+    })
+
+    expect(actual).toEqual(expected)
+  })
+})
+
+describe('createChart', () => {
+  it('returns a new chart considering offset', () => {
+    const expected: Chart = {
+      notes: [{ id: '1', ms: 1100, code: 'J' }]
+    }
+    const actual = createChart({
+      notes: [{ id: '1', ms: 1000, code: 'J' }],
+      offset: 100
     })
 
     expect(actual).toEqual(expected)
