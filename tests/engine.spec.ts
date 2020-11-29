@@ -75,7 +75,7 @@ describe('updateGameState', () => {
       notes: [{ ...baseNote, ms: 1000 }]
     }
 
-    const actual = updateGameState({ chart: current, time: 950 })
+    const actual = updateGameState({ chart: current, time: 950, inputs: [] })
     expect(actual).toEqual(expected)
   })
 
@@ -101,10 +101,12 @@ describe('updateGameState', () => {
     const actual = updateGameState({
       chart: current,
       time: 950,
-      input: {
-        code: baseNote.code,
-        ms: 940
-      }
+      inputs: [
+        {
+          code: baseNote.code,
+          ms: 940
+        }
+      ]
     })
 
     expect(actual).toEqual(expected)
@@ -142,10 +144,12 @@ describe('updateGameState', () => {
     const actual = updateGameState({
       chart: current,
       time: 950,
-      input: {
-        code: baseNote.code,
-        ms: 950
-      }
+      inputs: [
+        {
+          code: baseNote.code,
+          ms: 950
+        }
+      ]
     })
 
     expect(actual).toEqual(expected)
@@ -170,10 +174,46 @@ describe('updateGameState', () => {
     const actual = updateGameState({
       chart: current,
       time: 90,
-      input: {
-        code: note.code,
-        ms: 90
-      }
+      inputs: [
+        {
+          code: note.code,
+          ms: 90
+        }
+      ]
+    })
+
+    expect(actual).toEqual(expected)
+  })
+
+  it('supports simultaneous inputs', () => {
+    const aNote: GameNote = {
+      ...baseNote,
+      ms: 100,
+    }
+    const current: GameChart = {
+      notes: [{ ...aNote, id: '1', code: 'J' }, {...aNote, id: '2', code: 'K' }]
+    }
+
+    const expected: GameChart = {
+      notes: [
+        { ...aNote, id: '1', code: 'J', hitAt: 100, canHit: false, hitTiming: 0 }, 
+        { ...aNote, id: '2', code: 'K', hitAt: 100, canHit: false, hitTiming: 0 }, 
+      ]
+    }
+
+    const actual = updateGameState({
+      chart: current,
+      time: 100,
+      inputs: [
+        {
+          code: 'J',
+          ms: 100
+        },
+        {
+          code: 'K',
+          ms: 100
+        }
+      ]
     })
 
     expect(actual).toEqual(expected)

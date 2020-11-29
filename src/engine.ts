@@ -64,7 +64,7 @@ export function nearestNote(input: Input, chart: Chart): ChartNote | undefined {
   const nearest = chart.notes.reduce((best, note) => {
     if (
       input.code === note.code &&
-      Math.abs(note.ms - input.ms) < Math.abs(best.ms - input.ms)
+      Math.abs(note.ms - input.ms) <= Math.abs(best.ms - input.ms)
     ) {
       return note
     }
@@ -93,12 +93,18 @@ export function judge(input: Input, note: ChartNote): number {
 interface World {
   chart: GameChart
   time: number
-  input?: Input
+  inputs: Input[]
 }
 
 interface JudgementResult {
+  // the noteId used in this judgement.
   noteId: string
+
+  // how accurate the timing was. + is early. - is late.
   timing: number
+
+  // the time in ms the input was made.
+  time: number
 }
 
 /**
@@ -110,7 +116,8 @@ function judgeInput(input: Input, chart: Chart): JudgementResult | undefined {
   if (note) {
     return {
       timing: judge(input, note),
-      noteId: note.id
+      noteId: note.id,
+      time: input.ms
     }
   }
 }
@@ -136,20 +143,27 @@ export function initGameState(chart: Chart): GameChart {
  * If there is no user input, the new world will be identical to the previous one.
  */
 export function updateGameState(world: World): GameChart {
-  const judgementResult = world.input && judgeInput(world.input, world.chart)
+  const judgementResults = world.inputs.reduce<JudgementResult[]>((acc, input) => {
+    const result = judgeInput(input, world.chart)
+    if (result) {
+      return acc.concat(result)
+    }
+    return acc
+  }, [])
 
   return {
     notes: world.chart.notes.map<GameNote>((note) => {
-      if (!note.canHit || !judgementResult) {
+      if (!note.canHit || !judgementResults) {
         return note
       }
 
-      if (judgementResult.noteId === note.id) {
+      const noteJudgement = judgementResults.find(x => x.noteId === note.id)
+      if (noteJudgement && noteJudgement.noteId === note.id) {
         return {
           ...note,
-          hitAt: world.input!.ms,
+          hitAt: noteJudgement.time,
           canHit: false,
-          hitTiming: judgementResult.timing
+          hitTiming: noteJudgement.timing
         }
       }
 
