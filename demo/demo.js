@@ -148,7 +148,7 @@ var chartOffset = 2150;
 var chart = createChart({
     offset: chartOffset,
     notes: new Array(30).fill(0).map(function (_, idx) {
-        var ms = Math.round((1000 / (bpm / 60) * idx));
+        var ms = Math.round((1000 / (bpm / 60)) * idx);
         return {
             id: (idx + 1).toString(),
             ms: ms,
@@ -189,6 +189,7 @@ function updateDebug(world) {
 }
 var input;
 var playing = false;
+var SPEED_MOD = 2;
 function gameLoop(world) {
     var time = performance.now();
     if (!playing && time - world.core.offset >= songOffset) {
@@ -203,7 +204,7 @@ function gameLoop(world) {
     for (var _i = 0, _a = newGameState.notes; _i < _a.length; _i++) {
         var note = _a[_i];
         var yPos = world.shell.notes[note.id].ms - world.core.time;
-        world.shell.notes[note.id].$el.style.top = yPos / 10 + "px";
+        world.shell.notes[note.id].$el.style.top = yPos / SPEED_MOD + "px";
     }
     var newWorld = {
         core: {
@@ -231,7 +232,7 @@ var $chart = document.querySelector('#chart-notes');
 var _loop_1 = function (note) {
     var $note = document.createElement('div');
     $note.className = 'ui-note';
-    $note.style.top = Math.round(note.ms / 10) + "px";
+    $note.style.top = Math.round(note.ms / SPEED_MOD) + "px";
     $note.style.left = (function () {
         if (note.code === 'KeyD')
             return '0px';
@@ -252,7 +253,10 @@ for (var _i = 0, _a = gameChart.notes; _i < _a.length; _i++) {
 }
 function initKeydownListener(offset) {
     window.addEventListener('keydown', function (event) {
-        if (event.code === 'KeyJ' || event.code === 'KeyK' || event.code === 'KeyD' || event.code === 'KeyF') {
+        if (event.code === 'KeyJ' ||
+            event.code === 'KeyK' ||
+            event.code === 'KeyD' ||
+            event.code === 'KeyF') {
             input = { ms: event.timeStamp - offset, code: event.code };
         }
     });
@@ -262,7 +266,7 @@ document.querySelector('#end').addEventListener('click', function () {
     end = true;
 });
 document.querySelector('#start').addEventListener('click', function () {
-    audio.src = '/uber-rave.mp3';
+    audio.src = '/resources/uber-rave.mp3';
     var offset = performance.now();
     initKeydownListener(offset);
     var world = {

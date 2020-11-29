@@ -94,6 +94,7 @@ function updateDebug(world: UIWorld) {
 
 let input: Input | undefined
 let playing = false
+const SPEED_MOD = 2
 
 export function gameLoop(world: UIWorld) {
   const time = performance.now()
@@ -110,7 +111,7 @@ export function gameLoop(world: UIWorld) {
 
   for (const note of newGameState.notes) {
     const yPos = world.shell.notes[note.id].ms - world.core.time
-    world.shell.notes[note.id].$el.style.top = `${yPos / 10}px`
+    world.shell.notes[note.id].$el.style.top = `${yPos / SPEED_MOD}px`
   }
 
   const newWorld: UIWorld = {
@@ -146,7 +147,7 @@ const $chart = document.querySelector('#chart-notes')!
 for (const note of gameChart.notes) {
   const $note = document.createElement('div')
   $note.className = 'ui-note'
-  $note.style.top = `${Math.round(note.ms / 10)}px`
+  $note.style.top = `${Math.round(note.ms / SPEED_MOD)}px`
   $note.style.left = (() => {
     if (note.code === 'KeyD') return '0px'
     if (note.code === 'KeyF') return '25px'
