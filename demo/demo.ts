@@ -30,6 +30,17 @@ const randomKey = () => {
 const songOffset = 2000
 const chartOffset = 2150
 
+const uberRave: Chart = createChart({
+  offset: chartOffset,
+  notes: [
+    { id: '1', ms: 0, code: 'KeyJ' },
+    { id: '2', ms: 334, code: 'KeyK' },
+    { id: '3', ms: 713, code: 'KeyJ'},
+    { id: '4', ms: 1029, code: 'KeyJ' },
+    { id: '5', ms: 1029, code: 'KeyK' },
+  ]
+})
+
 const chart: Chart = createChart({
   offset: chartOffset,
   notes: new Array(30).fill(0).map((_, idx) => {
@@ -92,7 +103,7 @@ function updateDebug(world: UIWorld) {
   }
 }
 
-let input: Input | undefined
+let inputs: Input[] = []
 let playing = false
 const SPEED_MOD = 2
 
@@ -106,7 +117,7 @@ export function gameLoop(world: UIWorld) {
   const newGameState = updateGameState({
     time,
     chart: world.core.chart,
-    input
+    inputs
   })
 
   for (const note of newGameState.notes) {
@@ -125,9 +136,9 @@ export function gameLoop(world: UIWorld) {
     }
   }
 
-  if (input) {
+  if (inputs) {
     updateDebug(newWorld)
-    input = undefined
+    inputs = []
   }
 
   if (end) {
@@ -138,7 +149,7 @@ export function gameLoop(world: UIWorld) {
   requestAnimationFrame(() => gameLoop(newWorld))
 }
 
-const gameChart = initGameState(chart)
+const gameChart = initGameState(uberRave)
 
 const notes: Record<string, UINote> = {}
 
@@ -170,7 +181,7 @@ function initKeydownListener(offset: number) {
       event.code === 'KeyD' ||
       event.code === 'KeyF'
     ) {
-      input = { ms: event.timeStamp - offset, code: event.code }
+      inputs.push({ ms: event.timeStamp - offset, code: event.code })
     }
   })
 }

@@ -67,7 +67,7 @@ function createChart(args) {
 function nearestNote(input, chart) {
     var nearest = chart.notes.reduce(function (best, note) {
         if (input.code === note.code &&
-            Math.abs(note.ms - input.ms) < Math.abs(best.ms - input.ms)) {
+            Math.abs(note.ms - input.ms) <= Math.abs(best.ms - input.ms)) {
             return note;
         }
         return best;
@@ -91,7 +91,8 @@ function judgeInput(input, chart) {
     if (note) {
         return {
             timing: judge(input, note),
-            noteId: note.id
+            noteId: note.id,
+            time: input.ms
         };
     }
 }
@@ -112,14 +113,21 @@ function initGameState(chart) {
  * If there is no user input, the new world will be identical to the previous one.
  */
 function updateGameState(world) {
-    var judgementResult = world.input && judgeInput(world.input, world.chart);
+    var judgementResults = world.inputs.reduce(function (acc, input) {
+        var result = judgeInput(input, world.chart);
+        if (result) {
+            return acc.concat(result);
+        }
+        return acc;
+    }, []);
     return {
         notes: world.chart.notes.map(function (note) {
-            if (!note.canHit || !judgementResult) {
+            if (!note.canHit || !judgementResults) {
                 return note;
             }
-            if (judgementResult.noteId === note.id) {
-                return __assign$1(__assign$1({}, note), { hitAt: world.input.ms, canHit: false, hitTiming: judgementResult.timing });
+            var noteJudgement = judgementResults.find(function (x) { return x.noteId === note.id; });
+            if (noteJudgement && noteJudgement.noteId === note.id) {
+                return __assign$1(__assign$1({}, note), { hitAt: noteJudgement.time, canHit: false, hitTiming: noteJudgement.timing });
             }
             return note;
         })
@@ -145,6 +153,16 @@ var randomKey = function () {
 };
 var songOffset = 2000;
 var chartOffset = 2150;
+var uberRave = createChart({
+    offset: chartOffset,
+    notes: [
+        { id: '1', ms: 0, code: 'KeyJ' },
+        { id: '2', ms: 334, code: 'KeyK' },
+        { id: '3', ms: 713, code: 'KeyJ' },
+        { id: '4', ms: 1029, code: 'KeyJ' },
+        { id: '5', ms: 1029, code: 'KeyK' },
+    ]
+});
 var chart = createChart({
     offset: chartOffset,
     notes: new Array(30).fill(0).map(function (_, idx) {
@@ -187,7 +205,7 @@ function updateDebug(world) {
         $body.append($tr);
     }
 }
-var input;
+var inputs = [];
 var playing = false;
 var SPEED_MOD = 2;
 function gameLoop(world) {
@@ -199,7 +217,7 @@ function gameLoop(world) {
     var newGameState = updateGameState({
         time: time,
         chart: world.core.chart,
-        input: input
+        inputs: inputs
     });
     for (var _i = 0, _a = newGameState.notes; _i < _a.length; _i++) {
         var note = _a[_i];
@@ -216,9 +234,9 @@ function gameLoop(world) {
             notes: world.shell.notes
         }
     };
-    if (input) {
+    if (inputs) {
         updateDebug(newWorld);
-        input = undefined;
+        inputs = [];
     }
     if (end) {
         audio.pause();
@@ -226,7 +244,7 @@ function gameLoop(world) {
     }
     requestAnimationFrame(function () { return gameLoop(newWorld); });
 }
-var gameChart = initGameState(chart);
+var gameChart = initGameState(uberRave);
 var notes = {};
 var $chart = document.querySelector('#chart-notes');
 var _loop_1 = function (note) {
@@ -257,7 +275,7 @@ function initKeydownListener(offset) {
             event.code === 'KeyK' ||
             event.code === 'KeyD' ||
             event.code === 'KeyF') {
-            input = { ms: event.timeStamp - offset, code: event.code };
+            inputs.push({ ms: event.timeStamp - offset, code: event.code });
         }
     });
 }
