@@ -115,19 +115,28 @@ function updateGameState(world) {
     };
 }
 
+var bpm = 120;
+var delay = 2000;
 var chart = {
-    notes: [
-        { id: '1', ms: 1000, code: 'KeyJ' },
-        { id: '2', ms: 2000, code: 'KeyK' },
-        { id: '3', ms: 3000, code: 'KeyJ' },
-        { id: '4', ms: 4000, code: 'KeyK' },
-        { id: '5', ms: 5000, code: 'KeyJ' },
-        { id: '6', ms: 6000, code: 'KeyK' },
-        { id: '7', ms: 7000, code: 'KeyJ' }
-    ]
+    notes: new Array(50).fill(0).map(function (_, idx) {
+        return {
+            id: (idx + 1).toString(),
+            ms: (1000 / (bpm / 60) * idx) + 230 + delay,
+            code: 'KeyJ'
+        };
+    })
+    //  [
+    //   { id: '1', ms: 1000, code: 'KeyJ' },
+    //   { id: '2', ms: 2000, code: 'KeyK' },
+    //   { id: '3', ms: 3000, code: 'KeyJ' },
+    //   { id: '4', ms: 4000, code: 'KeyK' },
+    //   { id: '5', ms: 5000, code: 'KeyJ' },
+    //   { id: '6', ms: 6000, code: 'KeyK' },
+    //   { id: '7', ms: 7000, code: 'KeyJ' }
+    // ]
 };
 var end = false;
-setTimeout(function () { return (end = true); }, 20000);
+setTimeout(function () { return (end = true); }, 30000);
 function updateDebug(world) {
     var $body = document.querySelector('#debug-body');
     $body.innerHTML = '';
@@ -147,7 +156,7 @@ function updateDebug(world) {
 var input;
 function gameLoop(world) {
     var newGameState = updateGameState({
-        time: world.core.time,
+        time: performance.now(),
         chart: world.core.chart,
         input: input
     });
@@ -171,6 +180,7 @@ function gameLoop(world) {
         input = undefined;
     }
     if (end) {
+        audio.pause();
         return;
     }
     requestAnimationFrame(function () { return gameLoop(newWorld); });
@@ -193,7 +203,14 @@ function initKeydownListener(offset) {
         }
     });
 }
+var audio = document.createElement('audio');
+document.querySelector('#end').addEventListener('click', function () {
+    end = true;
+});
 document.querySelector('#start').addEventListener('click', function () {
+    // audio.src = 'http://localhost:8000/noxik-hotline.mp3'
+    audio.src = 'http://localhost:8000/120.mp3';
+    audio.play();
     var offset = performance.now();
     initKeydownListener(offset);
     var world = {

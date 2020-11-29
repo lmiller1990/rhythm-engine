@@ -7,16 +7,28 @@ import {
   Input
 } from '../dist'
 
+const bpm = 120
+
+
+const delay = 2000
 const chart: Chart = {
-  notes: [
-    { id: '1', ms: 1000, code: 'KeyJ' },
-    { id: '2', ms: 2000, code: 'KeyK' },
-    { id: '3', ms: 3000, code: 'KeyJ' },
-    { id: '4', ms: 4000, code: 'KeyK' },
-    { id: '5', ms: 5000, code: 'KeyJ' },
-    { id: '6', ms: 6000, code: 'KeyK' },
-    { id: '7', ms: 7000, code: 'KeyJ' }
-  ]
+  notes: new Array(50).fill(0).map((_, idx) => {
+    return {
+      id: (idx + 1).toString(),
+      ms: (1000 / (bpm / 60) * idx) + 230 + delay,
+      code: 'KeyJ'
+    }
+  })
+
+  //  [
+  //   { id: '1', ms: 1000, code: 'KeyJ' },
+  //   { id: '2', ms: 2000, code: 'KeyK' },
+  //   { id: '3', ms: 3000, code: 'KeyJ' },
+  //   { id: '4', ms: 4000, code: 'KeyK' },
+  //   { id: '5', ms: 5000, code: 'KeyJ' },
+  //   { id: '6', ms: 6000, code: 'KeyK' },
+  //   { id: '7', ms: 7000, code: 'KeyJ' }
+  // ]
 }
 
 interface UINote extends GameNote {
@@ -25,7 +37,7 @@ interface UINote extends GameNote {
 
 let end = false
 
-setTimeout(() => (end = true), 20000)
+setTimeout(() => (end = true), 30000)
 
 interface UIWorld {
   core: {
@@ -58,7 +70,7 @@ let input: Input | undefined
 
 export function gameLoop(world: UIWorld) {
   const newGameState = updateGameState({
-    time: world.core.time,
+    time: performance.now(), // world.core.time,
     chart: world.core.chart,
     input
   })
@@ -85,6 +97,7 @@ export function gameLoop(world: UIWorld) {
   }
 
   if (end) {
+    audio.pause()
     return
   }
 
@@ -116,7 +129,16 @@ function initKeydownListener(offset: number) {
   })
 }
 
+const audio = document.createElement('audio')
+document.querySelector('#end')!.addEventListener('click', () => {
+  end = true
+})
+
 document.querySelector('#start')!.addEventListener('click', () => {
+  // audio.src = 'http://localhost:8000/noxik-hotline.mp3'
+  audio.src = 'http://localhost:8000/120.mp3'
+  audio.play()
+
   const offset = performance.now()
   initKeydownListener(offset)
 
@@ -134,3 +156,5 @@ document.querySelector('#start')!.addEventListener('click', () => {
 
   requestAnimationFrame(() => gameLoop(world))
 })
+
+
