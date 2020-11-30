@@ -1,11 +1,11 @@
 import {
   Chart,
+  updateGameState,
   nearestNote,
   Input,
   judge,
   ChartNote,
   GameChart,
-  updateGameState,
   GameNote,
   createChart
 } from '../src/engine'

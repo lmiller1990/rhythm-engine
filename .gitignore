@@ -3,3 +3,4 @@ dist
 resources
 demo/*.js
 !demo/rollup.config.js
+.DS_Store

@@ -122,7 +122,9 @@ function judgeInput(input: Input, chart: Chart): JudgementResult | undefined {
   }
 }
 
-// Create a new "world", which represents the play-through of one chart.
+/**
+ *  Create a new "world", which represents the play-through of one chart.
+ */
 export function initGameState(chart: Chart): GameChart {
   return {
     notes: chart.notes.map((note) => {
