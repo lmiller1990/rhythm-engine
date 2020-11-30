@@ -5,6 +5,7 @@ export interface ChartNote<Code = string> {
   id: string
   ms: number
   code: Code
+  dependsOn?: string
 }
 
 export interface Chart<Code = string> {
@@ -80,6 +81,10 @@ export function nearestNote(input: Input, chart: Chart): ChartNote | undefined {
  * Useful for scoring systems.
  */
 export function judge(input: Input, note: ChartNote): number {
+  if (note.dependsOn) {
+    return 0
+  }
+
   return input.ms - note.ms
 }
 

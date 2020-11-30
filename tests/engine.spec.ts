@@ -54,6 +54,17 @@ describe('judgeInput', () => {
 
     expect(actual).toBe(10)
   })
+
+  it('awards perfect timing for hold notes', () => {
+    const input: Input = {
+      code: 'K',
+      ms: 510
+    }
+    const note: ChartNote = { id: '1', code: 'K', ms: 500, dependsOn: '1' }
+    const actual = judge(input, note)
+
+    expect(actual).toBe(0)
+  })
 })
 
 describe('updateGameState', () => {
