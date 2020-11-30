@@ -1,6 +1,9 @@
 import {
   Chart,
   updateGameState,
+  judgeInput,
+  JudgementResult,
+  EngineConfiguration,
   nearestNote,
   Input,
   judge,
@@ -9,6 +12,10 @@ import {
   GameNote,
   createChart
 } from '../src/engine'
+
+const engineConfiguration: EngineConfiguration = {
+  maxHitWindow: 100
+}
 
 describe('nearestNode', () => {
   it('captures nearest note based on time and input', () => {
@@ -44,6 +51,44 @@ describe('nearestNode', () => {
 })
 
 describe('judgeInput', () => {
+  it('judges input within max window', () => {
+    const input: Input = {
+      code: 'K',
+      ms: 100
+    }
+    // inside max input window of 100
+    const note: ChartNote = { id: '1', code: 'K', ms: 200 }
+    const actual = judgeInput({
+      input,
+      chart: { notes: [note] },
+      maxWindow: 100
+    })
+
+    expect(actual).toEqual<JudgementResult>({
+      noteId: '1',
+      time: 100,
+      timing: -100
+    })
+  })
+
+  it('does not judge input outside max window', () => {
+    const input: Input = {
+      code: 'K',
+      ms: 100
+    }
+    // outside max input window of 100 by 1
+    const note: ChartNote = { id: '1', code: 'K', ms: 201 }
+    const actual = judgeInput({
+      input,
+      chart: { notes: [note] },
+      maxWindow: 100
+    })
+
+    expect(actual).toBe(undefined)
+  })
+})
+
+describe('judge', () => {
   it('returns timing', () => {
     const input: Input = {
       code: 'K',
@@ -86,7 +131,10 @@ describe('updateGameState', () => {
       notes: [{ ...baseNote, ms: 1000 }]
     }
 
-    const actual = updateGameState({ chart: current, time: 950, inputs: [] })
+    const actual = updateGameState(
+      { chart: current, time: 950, inputs: [] },
+      engineConfiguration
+    )
     expect(actual).toEqual(expected)
   })
 
@@ -109,16 +157,19 @@ describe('updateGameState', () => {
       ]
     }
 
-    const actual = updateGameState({
-      chart: current,
-      time: 950,
-      inputs: [
-        {
-          code: baseNote.code,
-          ms: 940
-        }
-      ]
-    })
+    const actual = updateGameState(
+      {
+        chart: current,
+        time: 950,
+        inputs: [
+          {
+            code: baseNote.code,
+            ms: 940
+          }
+        ]
+      },
+      engineConfiguration
+    )
 
     expect(actual).toEqual(expected)
   })
@@ -152,16 +203,19 @@ describe('updateGameState', () => {
       ]
     }
 
-    const actual = updateGameState({
-      chart: current,
-      time: 950,
-      inputs: [
-        {
-          code: baseNote.code,
-          ms: 950
-        }
-      ]
-    })
+    const actual = updateGameState(
+      {
+        chart: current,
+        time: 950,
+        inputs: [
+          {
+            code: baseNote.code,
+            ms: 950
+          }
+        ]
+      },
+      engineConfiguration
+    )
 
     expect(actual).toEqual(expected)
   })
@@ -182,16 +236,19 @@ describe('updateGameState', () => {
       notes: [{ ...note }]
     }
 
-    const actual = updateGameState({
-      chart: current,
-      time: 90,
-      inputs: [
-        {
-          code: note.code,
-          ms: 90
-        }
-      ]
-    })
+    const actual = updateGameState(
+      {
+        chart: current,
+        time: 90,
+        inputs: [
+          {
+            code: note.code,
+            ms: 90
+          }
+        ]
+      },
+      engineConfiguration
+    )
 
     expect(actual).toEqual(expected)
   })
@@ -199,33 +256,53 @@ describe('updateGameState', () => {
   it('supports simultaneous inputs', () => {
     const aNote: GameNote = {
       ...baseNote,
-      ms: 100,
+      ms: 100
     }
     const current: GameChart = {
-      notes: [{ ...aNote, id: '1', code: 'J' }, {...aNote, id: '2', code: 'K' }]
+      notes: [
+        { ...aNote, id: '1', code: 'J' },
+        { ...aNote, id: '2', code: 'K' }
+      ]
     }
 
     const expected: GameChart = {
       notes: [
-        { ...aNote, id: '1', code: 'J', hitAt: 100, canHit: false, hitTiming: 0 }, 
-        { ...aNote, id: '2', code: 'K', hitAt: 100, canHit: false, hitTiming: 0 }, 
+        {
+          ...aNote,
+          id: '1',
+          code: 'J',
+          hitAt: 100,
+          canHit: false,
+          hitTiming: 0
+        },
+        {
+          ...aNote,
+          id: '2',
+          code: 'K',
+          hitAt: 100,
+          canHit: false,
+          hitTiming: 0
+        }
       ]
     }
 
-    const actual = updateGameState({
-      chart: current,
-      time: 100,
-      inputs: [
-        {
-          code: 'J',
-          ms: 100
-        },
-        {
-          code: 'K',
-          ms: 100
-        }
-      ]
-    })
+    const actual = updateGameState(
+      {
+        chart: current,
+        time: 100,
+        inputs: [
+          {
+            code: 'J',
+            ms: 100
+          },
+          {
+            code: 'K',
+            ms: 100
+          }
+        ]
+      },
+      engineConfiguration
+    )
 
     expect(actual).toEqual(expected)
   })

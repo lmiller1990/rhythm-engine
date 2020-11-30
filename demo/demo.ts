@@ -4,6 +4,7 @@ import {
   initGameState,
   GameNote,
   Input,
+  EngineConfiguration
 } from '../dist'
 import { uberRave } from './charts'
 
@@ -17,11 +18,18 @@ setTimeout(() => (end = true), 20000)
 
 export type Column = '1' | '2' | '3' | '4'
 
-const mapping: Record<'KeyM' | 'Comma' | 'Period' | 'Slash' | string, Column> = {
-  'KeyM': '1',
-  'Comma': '2',
-  'Period': '3',
-  'Slash': '4',
+const mapping: Record<
+  'KeyM' | 'Comma' | 'Period' | 'Slash' | string,
+  Column
+> = {
+  KeyM: '1',
+  Comma: '2',
+  Period: '3',
+  Slash: '4'
+}
+
+const config: EngineConfiguration = {
+  maxHitWindow: 100
 }
 
 interface UIWorld {
@@ -78,11 +86,14 @@ export function gameLoop(world: UIWorld) {
     playing = true
   }
 
-  const newGameState = updateGameState({
-    time,
-    chart: world.core.chart,
-    inputs
-  })
+  const newGameState = updateGameState(
+    {
+      time,
+      chart: world.core.chart,
+      inputs
+    },
+    config
+  )
 
   for (const note of newGameState.notes) {
     const yPos = world.shell.notes[note.id].ms - world.core.time

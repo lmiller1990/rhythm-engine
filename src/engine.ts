@@ -12,6 +12,10 @@ export interface Chart<Code = string> {
   notes: ChartNote<Code>[]
 }
 
+export interface EngineConfiguration {
+  maxHitWindow: number
+}
+
 interface CreateChart<Code = string> {
   offset: number
   notes: ChartNote<Code>[]
@@ -21,7 +25,9 @@ interface CreateChart<Code = string> {
  * Creates a new chart.
  * Handles things like offsetting the notes.
  */
-export function createChart<Code = string>(args: CreateChart<Code>): Chart<Code> {
+export function createChart<Code = string>(
+  args: CreateChart<Code>
+): Chart<Code> {
   return {
     notes: args.notes.map((note) => {
       return {
@@ -79,6 +85,11 @@ export function nearestNote(input: Input, chart: Chart): ChartNote | undefined {
  * Get the difference between the time the note should have been hit
  * and the actual time it was hit.
  * Useful for scoring systems.
+ *
+ * If a note depends on a previous one, it's a "hold note". We assume
+ * if the user hit that note, it's during a "hold", which means we
+ * aware them perfect timing. A hold note is considered perfect if it was held -
+ * this means hitting it anywhere in the valid window.
  */
 export function judge(input: Input, note: ChartNote): number {
   if (note.dependsOn) {
@@ -101,7 +112,7 @@ interface World {
   inputs: Input[]
 }
 
-interface JudgementResult {
+export interface JudgementResult {
   // the noteId used in this judgement.
   noteId: string
 
@@ -112,13 +123,29 @@ interface JudgementResult {
   time: number
 }
 
+interface JudgeInput {
+  // user input
+  input: Input
+
+  // current chart
+  chart: Chart
+
+  // maximum window to hit a note
+  maxWindow: number
+}
+
 /**
  * Given an input and a chart, see if there is a note nearby and judge
  * how accurately the player hit it.
  */
-function judgeInput(input: Input, chart: Chart): JudgementResult | undefined {
+export function judgeInput({
+  input,
+  chart,
+  maxWindow
+}: JudgeInput): JudgementResult | undefined {
   const note = nearestNote(input, chart)
-  if (note) {
+
+  if (note && Math.abs(note.ms - input.ms) <= maxWindow) {
     return {
       timing: judge(input, note),
       noteId: note.id,
@@ -149,14 +176,24 @@ export function initGameState(chart: Chart): GameChart {
  *
  * If there is no user input, the new world will be identical to the previous one.
  */
-export function updateGameState(world: World): GameChart {
-  const judgementResults = world.inputs.reduce<JudgementResult[]>((acc, input) => {
-    const result = judgeInput(input, world.chart)
-    if (result) {
-      return acc.concat(result)
-    }
-    return acc
-  }, [])
+export function updateGameState(
+  world: World,
+  config: EngineConfiguration
+): GameChart {
+  const judgementResults = world.inputs.reduce<JudgementResult[]>(
+    (acc, input) => {
+      const result = judgeInput({
+        input,
+        chart: world.chart,
+        maxWindow: config.maxHitWindow
+      })
+      if (result) {
+        return acc.concat(result)
+      }
+      return acc
+    },
+    []
+  )
 
   return {
     notes: world.chart.notes.map<GameNote>((note) => {
@@ -164,7 +201,7 @@ export function updateGameState(world: World): GameChart {
         return note
       }
 
-      const noteJudgement = judgementResults.find(x => x.noteId === note.id)
+      const noteJudgement = judgementResults.find((x) => x.noteId === note.id)
       if (noteJudgement && noteJudgement.noteId === note.id) {
         return {
           ...note,
