@@ -9,34 +9,79 @@ import {
 import { uberRave } from './charts'
 
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
-const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-const renderer = new THREE.WebGLRenderer()
-renderer.setSize(window.innerWidth, window.innerHeight)
-document.body.appendChild(renderer.domElement)
 
-const geometry = new THREE.BoxGeometry()
-const material  = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-const cube = new THREE.Mesh(geometry, material)
-scene.add(cube)
+const LANE_WIDTH = 1
+const LANE_DEPTH = 12
 
-camera.position.z = 5
-
-function animate() {
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-  requestAnimationFrame(animate)
-  renderer.render(scene, camera)
+function createLane() {
+  const geometry = new THREE.BoxGeometry(LANE_WIDTH, 0.1, LANE_DEPTH)
+  const material = new THREE.MeshLambertMaterial({ color: 0xdbbbc7 })
+  const mesh = new THREE.Mesh(geometry, material)
+  return mesh
 }
 
-animate()
+function corners(mesh: THREE.Mesh) {
+  const halfWidth = LANE_WIDTH * 0.5
+  return {
+    x0: mesh.position.x - halfWidth,
+    x1: mesh.position.x + halfWidth,
+    z0: mesh.position.z,
+    z1: mesh.position.z + LANE_DEPTH,
+  }
+}
+
+function init() {
+  const scene = new THREE.Scene()
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 20)
+  camera.position.set(0, 4, -10)
+
+  const light = new THREE.DirectionalLight(0xFFFFFF, 1)
+  light.position.set(1, 10, 6)
+  scene.add(light)
+
+  const ambient = new THREE.HemisphereLight(0xffffbb, 0x080820);
+  scene.add(ambient);
+
+  const renderer = new THREE.WebGLRenderer()
+  renderer.setSize(window.innerWidth, window.innerHeight)
+  document.body.appendChild(renderer.domElement)
+
+  let offset = -1.5
+  for (let i = 0; i < 1; i++) {
+    const lane = createLane()
+    lane.position.set(0, 0, 0)
+    console.log(corners(lane))
+    // scene.add(lane)
+  }
+
+  const controls = new OrbitControls(camera, renderer.domElement)
+  controls.target.set(0,4,0)
+  controls.update()
+
+  update({ scene, camera, renderer })
+  return { scene, camera, renderer }
+}
+
+const { scene, camera, renderer } = init()
+
+interface Update {
+  scene: THREE.Scene
+  camera: THREE.PerspectiveCamera
+  renderer: THREE.WebGLRenderer
+}
+
+function update({ scene, camera, renderer }: Update) {
+  requestAnimationFrame(() => update({ scene, camera, renderer }));
+	renderer.render(scene, camera);
+}
 
 const ctx = document.createElement('canvas')
 document.body.appendChild(ctx)
 
-interface UINote extends GameNote {
-  $el: HTMLDivElement
+interface UINote<T> extends GameNote {
+  $el: T
 }
 
 let end = false
@@ -66,7 +111,7 @@ interface UIWorld {
     offset: number
   }
   shell: {
-    notes: Record<string, UINote>
+    notes: Record<string, UINote<THREE.Mesh>>
   }
 }
 
@@ -124,7 +169,7 @@ export function gameLoop(world: UIWorld) {
 
   for (const note of newGameState.notes) {
     const yPos = world.shell.notes[note.id].ms - world.core.time
-    world.shell.notes[note.id].$el.style.top = `${yPos / SPEED_MOD}px`
+    world.shell.notes[note.id].$el.position.z = yPos / SPACING
   }
 
   const newWorld: UIWorld = {
@@ -153,20 +198,31 @@ export function gameLoop(world: UIWorld) {
 
 const gameChart = initGameState(uberRave)
 
-const notes: Record<string, UINote> = {}
+const notes: Record<string, UINote<THREE.Mesh>> = {}
 
 const $chart = document.querySelector('#chart-notes')!
 
+const SPACING = 500
+let i = 0
+
 for (const note of gameChart.notes) {
-  const $note = document.createElement('div')
-  $note.className = 'ui-note'
-  $note.style.top = `${Math.round(note.ms / SPEED_MOD)}px`
-  $note.style.left = `${(parseInt(note.code) - 1) * 25}px`
+
+  // const $note = document.createElement('div')
+  // $note.className = 'ui-note'
+  // $note.style.top = `${Math.round(note.ms / SPEED_MOD)}px`
+  // $note.style.left = `${(parseInt(note.code) - 1) * 25}px`
+
+  const box = new THREE.BoxGeometry(LANE_WIDTH, 0.1, 0.3)
+  const material = new THREE.MeshLambertMaterial({ color: 0xABCDEF })
+  const $note = new THREE.Mesh(box, material)
+  $note.position.set(-parseInt(note.code), 0, note.ms / SPACING)
+  scene.add($note)
+
   notes[note.id] = {
     ...note,
     $el: $note
   }
-  $chart.appendChild($note)
+  // $chart.appendChild($note)
 }
 
 function initKeydownListener(offset: number) {
@@ -204,7 +260,7 @@ document.querySelector('#start')!.addEventListener('click', () => {
       notes
     }
   }
-  updateDebug(world)
+  // updateDebug(world)
 
   requestAnimationFrame(() => gameLoop(world))
 })
