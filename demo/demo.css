@@ -1,5 +1,8 @@
 #game {
   display: flex;
+  height: 500px;
+  border: 1px solid;
+  overflow: hidden;
 }
 
 .note__timing {

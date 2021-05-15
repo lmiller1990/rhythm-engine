@@ -77,7 +77,15 @@ function updateDebug(world: UIWorld) {
 let inputs: Input[] = []
 let playing = false
 const SPEED_MOD = 2
-const songOffset = 2000
+let songOffset = 2100
+
+const $offset = document.querySelector<HTMLInputElement>('#offset')!
+$offset.value = songOffset.toString()
+$offset.addEventListener('input', (e: Event) => {
+  const value = (e.target as HTMLInputElement).value
+  songOffset = parseInt(value, 10)
+  console.log(songOffset)
+})
 
 export function gameLoop(world: UIWorld) {
   const time = performance.now()
@@ -162,6 +170,7 @@ document.querySelector('#end')!.addEventListener('click', () => {
 })
 
 document.querySelector('#start')!.addEventListener('click', () => {
+  audio.volume = 0.1
   audio.src = '/resources/uber-rave.mp3'
 
   const offset = performance.now()
