@@ -8,12 +8,28 @@ export interface ChartNote<Code = string> {
   dependsOn?: string
 }
 
+/**
+ * Definition of a timing window.
+ * name: "fanastic", "exellent", etc
+ *
+ * windowMs: size of window in ms. If a window is 22ms,
+ * that means a note can be hit +- 11ms either side.
+ * For example, if the windowMs is 22ms, and the note should be
+ * hit at 300ms, an input at 289ms or 311m are within the window,
+ * but 288ms and 312ms are not.
+ */
+export interface TimingWindow {
+  name: string
+  windowMs: number
+}
+
 export interface Chart<Code = string> {
   notes: ChartNote<Code>[]
 }
 
 export interface EngineConfiguration {
   maxHitWindow: number
+  timingWindows: TimingWindow[] | undefined
 }
 
 interface CreateChart<Code = string> {
@@ -121,6 +137,31 @@ export interface JudgementResult {
 
   // the time in ms the input was made.
   time: number
+
+  // scored timing window, if available
+  timingWindowName: string | undefined
+}
+
+function getTimingWindow(
+  timing: number,
+  timingWindows: TimingWindow[]
+): TimingWindow | undefined {
+  // to make things nice and fast, we use a heuristic:
+  // timingWindows is always sorted from
+  // smallest to largest. Ignore windows that are too small
+  // return the first window that the timing fits in.
+
+  for (let i = 0; i < timingWindows.length; i++) {
+    // divide by 2 because a window of 22ms, for example, actually means
+    // "+= 11ms either side of the note"
+    const windowSize = timingWindows[i].windowMs / 2
+
+    if (timing <= windowSize) {
+      return timingWindows[i]
+    }
+  }
+
+  return undefined
 }
 
 interface JudgeInput {
@@ -132,6 +173,9 @@ interface JudgeInput {
 
   // maximum window to hit a note
   maxWindow: number
+
+  // developer supplied timing windows
+  timingWindows: TimingWindow[] | undefined
 }
 
 /**
@@ -141,15 +185,20 @@ interface JudgeInput {
 export function judgeInput({
   input,
   chart,
-  maxWindow
+  maxWindow,
+  timingWindows
 }: JudgeInput): JudgementResult | undefined {
   const note = nearestNote(input, chart)
 
   if (note && Math.abs(note.ms - input.ms) <= maxWindow) {
+    const timing = judge(input, note)
     return {
-      timing: judge(input, note),
+      timing,
       noteId: note.id,
-      time: input.ms
+      time: input.ms,
+      timingWindowName: timingWindows
+        ? getTimingWindow(timing, timingWindows)?.name
+        : undefined
     }
   }
 }
@@ -185,7 +234,8 @@ export function updateGameState(
       const result = judgeInput({
         input,
         chart: world.chart,
-        maxWindow: config.maxHitWindow
+        maxWindow: config.maxHitWindow,
+        timingWindows: config.timingWindows
       })
       if (result) {
         return acc.concat(result)

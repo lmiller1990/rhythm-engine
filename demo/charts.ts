@@ -14,15 +14,15 @@ export const uberRave: Chart<Column> = createChart({
     { id: '3', ms: 684, code: '1' },
     { id: '4', ms: 1026, code: '2' },
     { id: '5', ms: 1026, code: '1' },
-    { id: '6', ms: 1368, code: '1',},
-    { id: '7', ms: 1710, code: '2', },
-    { id: '8', ms: 2052, code: '3', },
-    { id: '9', ms: 2394, code: '4', },
-    { id: '10', ms: 2394, code: '3', },
-    { id: '11', ms: 2736, code: '2', },
-    { id: '12', ms: 3078, code: '1', },
-    { id: '13', ms: 3420, code: '4', },
-    { id: '14', ms: 3762, code: '1', },
+    { id: '6', ms: 1368, code: '1' },
+    { id: '7', ms: 1710, code: '2' },
+    { id: '8', ms: 2052, code: '3' },
+    { id: '9', ms: 2394, code: '4' },
+    { id: '10', ms: 2394, code: '3' },
+    { id: '11', ms: 2736, code: '2' },
+    { id: '12', ms: 3078, code: '1' },
+    { id: '13', ms: 3420, code: '4' },
+    { id: '14', ms: 3762, code: '1' }
   ]
 })
 

@@ -14,7 +14,8 @@ import {
 } from '../src/engine'
 
 const engineConfiguration: EngineConfiguration = {
-  maxHitWindow: 100
+  maxHitWindow: 100,
+  timingWindows: undefined
 }
 
 describe('nearestNode', () => {
@@ -61,13 +62,15 @@ describe('judgeInput', () => {
     const actual = judgeInput({
       input,
       chart: { notes: [note] },
-      maxWindow: 100
+      maxWindow: 100,
+      timingWindows: undefined
     })
 
     expect(actual).toEqual<JudgementResult>({
       noteId: '1',
       time: 100,
-      timing: -100
+      timing: -100,
+      timingWindowName: undefined
     })
   })
 
@@ -81,10 +84,101 @@ describe('judgeInput', () => {
     const actual = judgeInput({
       input,
       chart: { notes: [note] },
-      maxWindow: 100
+      maxWindow: 100,
+      timingWindows: undefined
     })
 
     expect(actual).toBe(undefined)
+  })
+
+  it('considers timing windows when note is inside smallest window', () => {
+    const note: ChartNote = { id: '1', code: 'K', ms: 100 }
+    const input: Input = {
+      code: 'K',
+      ms: 111
+    }
+    const actual = judgeInput({
+      input,
+      chart: { notes: [note] },
+      maxWindow: 100,
+      timingWindows: [
+        {
+          name: 'fantastic',
+          windowMs: 22
+        },
+        {
+          name: 'excellent',
+          windowMs: 33
+        }
+      ]
+    })
+
+    expect(actual).toEqual<JudgementResult>({
+      timing: 11,
+      noteId: note.id,
+      time: 111,
+      timingWindowName: 'fantastic'
+    })
+  })
+
+  it('considers timing windows when note is inside largest window', () => {
+    const note: ChartNote = { id: '1', code: 'K', ms: 100 }
+    const input: Input = {
+      code: 'K',
+      ms: 111
+    }
+    const actual = judgeInput({
+      input,
+      chart: { notes: [note] },
+      maxWindow: 100,
+      timingWindows: [
+        {
+          name: 'fantastic',
+          windowMs: 10
+        },
+        {
+          name: 'excellent',
+          windowMs: 33
+        }
+      ]
+    })
+
+    expect(actual).toEqual<JudgementResult>({
+      timing: 11,
+      noteId: note.id,
+      time: 111,
+      timingWindowName: 'excellent'
+    })
+  })
+
+  it('considers timing windows when note outside all windows', () => {
+    const note: ChartNote = { id: '1', code: 'K', ms: 100 }
+    const input: Input = {
+      code: 'K',
+      ms: 150
+    }
+    const actual = judgeInput({
+      input,
+      chart: { notes: [note] },
+      maxWindow: 100,
+      timingWindows: [
+        {
+          name: 'fantastic',
+          windowMs: 10
+        },
+        {
+          name: 'excellent',
+          windowMs: 20
+        }
+      ]
+    })
+
+    expect(actual).toEqual<JudgementResult>({
+      timing: 50,
+      noteId: note.id,
+      time: 150,
+      timingWindowName: undefined
+    })
   })
 })
 
