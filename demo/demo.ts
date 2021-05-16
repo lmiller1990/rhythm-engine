@@ -29,7 +29,17 @@ const mapping: Record<
 }
 
 const config: EngineConfiguration = {
-  maxHitWindow: 100
+  maxHitWindow: 100,
+  timingWindows: [
+    {
+      name: 'fantastic',
+      windowMs: 60,
+    },
+    {
+      name: 'excellent',
+      windowMs: 120,
+    },
+  ]
 }
 
 interface UIWorld {
@@ -60,7 +70,7 @@ function updateDebug(world: UIWorld) {
 
   for (const note of world.core.chart.notes) {
     const $tr = document.createElement('tr')
-    for (const attr of ['id', 'hitTiming', 'code', 'ms', 'canHit', 'hitAt']) {
+    for (const attr of ['id', 'hitTiming', 'timingWindowName', 'code', 'ms', 'canHit', 'hitAt']) {
       if (hide.includes(attr)) {
         continue
       }
@@ -82,6 +92,13 @@ const GLOBAL_DELAY = 2100
 const MACHINE_DELAY = 100
 
 const DELAY = GLOBAL_DELAY + MACHINE_DELAY
+
+let state: UIWorld
+
+// @ts-ignore
+window.logWorld = () => {
+  console.log(state)
+}
 
 export function gameLoop(world: UIWorld) {
   const time = performance.now()
@@ -114,6 +131,8 @@ export function gameLoop(world: UIWorld) {
       notes: world.shell.notes
     }
   }
+
+  state = newWorld
 
   if (inputs) {
     updateDebug(newWorld)
@@ -155,7 +174,6 @@ function initKeydownListener(offset: number) {
     if (!code) {
       return
     }
-    console.log({ timeStamp: event.timeStamp, offset, DELAY })
     inputs.push({ ms: event.timeStamp - offset - DELAY, code })
   })
 }

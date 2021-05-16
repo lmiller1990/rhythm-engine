@@ -11,7 +11,7 @@
   <body>
     <button id="start">Start</button>
     <button id="end">End</button>
-    <label for="offset">Offset</label>
+    <button onclick="logWorld()">Log world</button>
     <div id="game">
       <div id="chart-notes"></div>
       <table id="debug">
@@ -19,6 +19,7 @@
           <tr id="debug-head">
             <th data-debugid="id">id</th>
             <th data-debugid="hitTiming">hit timing</th>
+            <th data-debugid="timingWindowName">timing</th>
             <th data-debugid="code">code</th>
             <th data-debugid="ms">ms</th>
             <th data-debugid="canHit">can hit</th>

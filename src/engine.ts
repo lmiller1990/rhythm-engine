@@ -63,6 +63,7 @@ export interface GameNote extends ChartNote {
   canHit: boolean
   hitTiming?: number
   hitAt?: number
+  timingWindowName: string | undefined
 }
 
 export interface GameChart {
@@ -211,6 +212,7 @@ export function initGameState(chart: Chart): GameChart {
     notes: chart.notes.map((note) => {
       return {
         ...note,
+        timingWindowName: undefined,
         canHit: true
       }
     })
@@ -257,7 +259,8 @@ export function updateGameState(
           ...note,
           hitAt: noteJudgement.time,
           canHit: false,
-          hitTiming: noteJudgement.timing
+          hitTiming: noteJudgement.timing,
+          timingWindowName: noteJudgement.timingWindowName
         }
       }
 
