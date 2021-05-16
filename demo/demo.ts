@@ -14,7 +14,7 @@ interface UINote extends GameNote {
 
 let end = false
 
-setTimeout(() => (end = true), 20000)
+setTimeout(() => (end = true), 10000)
 
 export type Column = '1' | '2' | '3' | '4'
 
@@ -77,19 +77,15 @@ function updateDebug(world: UIWorld) {
 let inputs: Input[] = []
 let playing = false
 const SPEED_MOD = 2
-let songOffset = 2100
+// the larger this, the later the song will start playing.
+const GLOBAL_DELAY = 2100
+const MACHINE_DELAY = 100
 
-const $offset = document.querySelector<HTMLInputElement>('#offset')!
-$offset.value = songOffset.toString()
-$offset.addEventListener('input', (e: Event) => {
-  const value = (e.target as HTMLInputElement).value
-  songOffset = parseInt(value, 10)
-  console.log(songOffset)
-})
+const DELAY = GLOBAL_DELAY + MACHINE_DELAY
 
 export function gameLoop(world: UIWorld) {
   const time = performance.now()
-  if (!playing && time - world.core.offset >= songOffset) {
+  if (!playing && time - world.core.offset >= GLOBAL_DELAY) {
     audio.play()
     playing = true
   }
@@ -104,7 +100,7 @@ export function gameLoop(world: UIWorld) {
   )
 
   for (const note of newGameState.notes) {
-    const yPos = world.shell.notes[note.id].ms - world.core.time
+    const yPos = world.shell.notes[note.id].ms + DELAY - world.core.time
     world.shell.notes[note.id].$el.style.top = `${yPos / SPEED_MOD}px`
   }
 
@@ -141,7 +137,7 @@ const $chart = document.querySelector('#chart-notes')!
 for (const note of gameChart.notes) {
   const $note = document.createElement('div')
   $note.className = 'ui-note'
-  $note.style.top = `${Math.round(note.ms / SPEED_MOD)}px`
+  $note.style.top = `${Math.round((note.ms + DELAY) / SPEED_MOD)}px`
   $note.style.left = `${(parseInt(note.code) - 1) * 25}px`
   notes[note.id] = {
     ...note,
@@ -159,8 +155,8 @@ function initKeydownListener(offset: number) {
     if (!code) {
       return
     }
-
-    inputs.push({ ms: event.timeStamp - offset, code })
+    console.log({ timeStamp: event.timeStamp, offset, DELAY })
+    inputs.push({ ms: event.timeStamp - offset - DELAY, code })
   })
 }
 

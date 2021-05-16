@@ -1,6 +1,6 @@
 #game {
   display: flex;
-  height: 500px;
+  height: 600px;
   border: 1px solid;
   overflow: hidden;
 }
