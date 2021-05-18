@@ -231,7 +231,7 @@ export interface UpdatedGameState {
 
 /**
  * Returns a new chart and relevant data, given the existing state of the world.
- * 
+ *
  * The only way the world changes is via a user input.
  * Given X world and Y input, the new world will always be Z.
  * That is to say the world in the engine is deterministic - no side effects.

@@ -33,12 +33,12 @@ const config: EngineConfiguration = {
   timingWindows: [
     {
       name: 'fantastic',
-      windowMs: 50,
+      windowMs: 50
     },
     {
       name: 'excellent',
-      windowMs: 100,
-    },
+      windowMs: 100
+    }
   ]
 }
 
@@ -70,7 +70,15 @@ function updateDebug(world: UIWorld) {
 
   for (const note of world.core.chart.notes) {
     const $tr = document.createElement('tr')
-    for (const attr of ['id', 'hitTiming', 'timingWindowName', 'code', 'ms', 'canHit', 'hitAt']) {
+    for (const attr of [
+      'id',
+      'hitTiming',
+      'timingWindowName',
+      'code',
+      'ms',
+      'canHit',
+      'hitAt'
+    ]) {
       if (hide.includes(attr)) {
         continue
       }
@@ -135,7 +143,7 @@ export function gameLoop(world: UIWorld) {
       offset: world.core.offset,
       time: performance.now() - world.core.offset,
       chart: {
-        notes: newGameState.chart.notes 
+        notes: newGameState.chart.notes
       }
     },
     shell: {
