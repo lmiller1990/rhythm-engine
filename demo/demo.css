@@ -1,5 +1,6 @@
 #game {
   display: flex;
+  position: relative;
   height: 600px;
   border: 1px solid;
   overflow: hidden;
@@ -31,6 +32,14 @@
 
 .note__name {
   width: 120px;
+}
+
+.fantastic {
+  color: lightseagreen;
+  font-size: 3rem;
+  font-family: 'Brush Script MT', cursive;
+  top: 80px;
+  left: 40px;
 }
 
 #chart-notes {

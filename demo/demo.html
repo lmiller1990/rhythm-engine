@@ -13,6 +13,7 @@
     <button id="end">End</button>
     <button onclick="logWorld()">Log world</button>
     <div id="game">
+      <div class="fantastic" style="position: absolute">Fantastic</div>
       <div id="chart-notes"></div>
       <table id="debug">
         <thead>
@@ -31,6 +32,21 @@
       </table>
     </div>
 
+    <style>
+      .timing {
+        --scale: 1.2;
+        transform: scaleX(var(--scale)) scaleY(var(--scale));
+        transition: 0.1s;
+        transform-origin: center center;
+      }
+    </style>
+    <div style="position: relative">
+    </div>
+    <br />
+    <br />
+    <br />
+    <br />
+    <button onclick="window.animate()">Animate</button>
     <script src="/demo.js" type="module"></script>
   </body>
 

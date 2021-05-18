@@ -66,10 +66,6 @@ export interface GameNote extends ChartNote {
   timingWindowName: string | undefined
 }
 
-export interface GameChart {
-  notes: GameNote[]
-}
-
 /**
  * Represents an input from the user.
  * ms is the time of the input in millseconds since
@@ -116,16 +112,21 @@ export function judge(input: Input, note: ChartNote): number {
   return input.ms - note.ms
 }
 
+export interface GameChart {
+  notes: GameNote[]
+}
+
 /**
  * Represents the current state of the game engine.
- * Chart is the chart selected.
- * Time is how fast we have progressed since the song started.
- * Input will be present if the user made an input when the game
- * was in this state
  */
 interface World {
+  // The chart selected.
   chart: GameChart
+
+  // How fast we have progressed since the song started.
   time: number
+
+  // Array of inputs made by the user.
   inputs: Input[]
 }
 
@@ -219,18 +220,28 @@ export function initGameState(chart: Chart): GameChart {
   }
 }
 
+interface PreviousFrameMeta {
+  judgementResults: JudgementResult[]
+}
+
+export interface UpdatedGameState {
+  chart: GameChart
+  previousFrameMeta: PreviousFrameMeta
+}
+
 /**
- * Returns a new world, given an existing one and (optionally) an input.
+ * Returns a new chart and relevant data, given the existing state of the world.
+ * 
  * The only way the world changes is via a user input.
  * Given X world and Y input, the new world will always be Z.
  * That is to say the world in the engine is deterministic - no side effects.
  *
- * If there is no user input, the new world will be identical to the previous one.
+ * If there is no user input - that is, `inputs` is an empty array, the new chart will be identical to the previous one.
  */
 export function updateGameState(
   world: World,
   config: EngineConfiguration
-): GameChart {
+): UpdatedGameState {
   const judgementResults = world.inputs.reduce<JudgementResult[]>(
     (acc, input) => {
       const result = judgeInput({
@@ -248,23 +259,28 @@ export function updateGameState(
   )
 
   return {
-    notes: world.chart.notes.map<GameNote>((note) => {
-      if (!note.canHit || !judgementResults) {
-        return note
-      }
-
-      const noteJudgement = judgementResults.find((x) => x.noteId === note.id)
-      if (noteJudgement && noteJudgement.noteId === note.id) {
-        return {
-          ...note,
-          hitAt: noteJudgement.time,
-          canHit: false,
-          hitTiming: noteJudgement.timing,
-          timingWindowName: noteJudgement.timingWindowName
+    previousFrameMeta: {
+      judgementResults
+    },
+    chart: {
+      notes: world.chart.notes.map<GameNote>((note) => {
+        if (!note.canHit || !judgementResults) {
+          return note
         }
-      }
 
-      return note
-    })
+        const noteJudgement = judgementResults.find((x) => x.noteId === note.id)
+        if (noteJudgement && noteJudgement.noteId === note.id) {
+          return {
+            ...note,
+            hitAt: noteJudgement.time,
+            canHit: false,
+            hitTiming: noteJudgement.timing,
+            timingWindowName: noteJudgement.timingWindowName
+          }
+        }
+
+        return note
+      })
+    }
   }
 }

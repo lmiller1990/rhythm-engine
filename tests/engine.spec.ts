@@ -1,6 +1,7 @@
 import {
   Chart,
   updateGameState,
+  UpdatedGameState,
   judgeInput,
   JudgementResult,
   EngineConfiguration,
@@ -211,7 +212,8 @@ describe('updateGameState', () => {
     id: '1',
     ms: 0,
     code: 'J',
-    canHit: true
+    canHit: true,
+    timingWindowName: undefined
   }
 
   it('updates the world given relative to given millseconds', () => {
@@ -221,8 +223,13 @@ describe('updateGameState', () => {
     }
 
     // 50 ms has passed since last update
-    const expected: GameChart = {
-      notes: [{ ...baseNote, ms: 1000 }]
+    const expected: UpdatedGameState = {
+      chart: {
+        notes: [{ ...baseNote, ms: 1000 }]
+      },
+      previousFrameMeta: {
+        judgementResults: []
+      }
     }
 
     const actual = updateGameState(
@@ -239,16 +246,30 @@ describe('updateGameState', () => {
     }
 
     // 50 ms has passed since last update
-    const expected: GameChart = {
-      notes: [
-        {
-          ...baseNote,
-          ms: 1000,
-          canHit: false,
-          hitTiming: -60,
-          hitAt: 940
-        }
-      ]
+    const expected: UpdatedGameState = {
+      previousFrameMeta: {
+        judgementResults: [
+          {
+            noteId: '1',
+            time: 940,
+            timing: -60,
+            // no timing windows are specified, so we are just using default maxHit
+            // this means the timing window is undefined.
+            timingWindowName: undefined
+          }
+        ]
+      },
+      chart: {
+        notes: [
+          {
+            ...baseNote,
+            ms: 1000,
+            canHit: false,
+            hitTiming: -60,
+            hitAt: 940
+          }
+        ]
+      }
     }
 
     const actual = updateGameState(
@@ -283,18 +304,31 @@ describe('updateGameState', () => {
     }
 
     // t = 950
-    const expected: GameChart = {
-      notes: [
-        {
-          ...alreadyHitNote
-        },
-        {
-          ...current.notes[1],
-          canHit: false,
-          hitTiming: -50,
-          hitAt: 950
-        }
-      ]
+    const expected: UpdatedGameState = {
+      chart: {
+        notes: [
+          {
+            ...alreadyHitNote
+          },
+          {
+            ...current.notes[1],
+            canHit: false,
+            hitTiming: -50,
+            hitAt: 950
+          }
+        ]
+      },
+      previousFrameMeta: {
+        judgementResults: [
+          {
+            noteId: '2',
+            time: 950,
+            timing: -50,
+            // no timing windows passed in config.
+            timingWindowName: undefined
+          }
+        ]
+      }
     }
 
     const actual = updateGameState(
@@ -326,8 +360,21 @@ describe('updateGameState', () => {
       notes: [note]
     }
 
-    const expected: GameChart = {
-      notes: [{ ...note }]
+    const expected: UpdatedGameState = {
+      previousFrameMeta: {
+        judgementResults: [
+          {
+            noteId: '1',
+            time: 90,
+            timing: -10,
+            // no timing windows passed in config.
+            timingWindowName: undefined
+          }
+        ]
+      },
+      chart: {
+        notes: [{ ...note }]
+      }
     }
 
     const actual = updateGameState(
@@ -359,25 +406,43 @@ describe('updateGameState', () => {
       ]
     }
 
-    const expected: GameChart = {
-      notes: [
-        {
-          ...aNote,
-          id: '1',
-          code: 'J',
-          hitAt: 100,
-          canHit: false,
-          hitTiming: 0
-        },
-        {
-          ...aNote,
-          id: '2',
-          code: 'K',
-          hitAt: 100,
-          canHit: false,
-          hitTiming: 0
-        }
-      ]
+    const expected: UpdatedGameState = {
+      chart: {
+        notes: [
+          {
+            ...aNote,
+            id: '1',
+            code: 'J',
+            hitAt: 100,
+            canHit: false,
+            hitTiming: 0
+          },
+          {
+            ...aNote,
+            id: '2',
+            code: 'K',
+            hitAt: 100,
+            canHit: false,
+            hitTiming: 0
+          }
+        ]
+      },
+      previousFrameMeta: {
+        judgementResults: [
+          {
+            noteId: '1',
+            time: 100,
+            timing: 0,
+            timingWindowName: undefined
+          },
+          {
+            noteId: '2',
+            time: 100,
+            timing: 0,
+            timingWindowName: undefined
+          }
+        ]
+      }
     }
 
     const actual = updateGameState(

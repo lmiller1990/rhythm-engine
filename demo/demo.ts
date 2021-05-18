@@ -33,11 +33,11 @@ const config: EngineConfiguration = {
   timingWindows: [
     {
       name: 'fantastic',
-      windowMs: 60,
+      windowMs: 50,
     },
     {
       name: 'excellent',
-      windowMs: 120,
+      windowMs: 100,
     },
   ]
 }
@@ -100,6 +100,15 @@ window.logWorld = () => {
   console.log(state)
 }
 
+const el = document.querySelector<HTMLDivElement>('.fantastic')!
+// @ts-ignore
+window.animate = () => {
+  console.log('remove')
+  el.classList.remove('timing')
+  void el.offsetWidth
+  el.classList.add('timing')
+}
+
 export function gameLoop(world: UIWorld) {
   const time = performance.now()
   if (!playing && time - world.core.offset >= GLOBAL_DELAY) {
@@ -116,7 +125,7 @@ export function gameLoop(world: UIWorld) {
     config
   )
 
-  for (const note of newGameState.notes) {
+  for (const note of newGameState.chart.notes) {
     const yPos = world.shell.notes[note.id].ms + DELAY - world.core.time
     world.shell.notes[note.id].$el.style.top = `${yPos / SPEED_MOD}px`
   }
@@ -125,7 +134,9 @@ export function gameLoop(world: UIWorld) {
     core: {
       offset: world.core.offset,
       time: performance.now() - world.core.offset,
-      chart: newGameState
+      chart: {
+        notes: newGameState.chart.notes 
+      }
     },
     shell: {
       notes: world.shell.notes
@@ -134,8 +145,9 @@ export function gameLoop(world: UIWorld) {
 
   state = newWorld
 
-  if (inputs) {
+  if (inputs.length) {
     updateDebug(newWorld)
+    console.log(newWorld)
     inputs = []
   }
 
