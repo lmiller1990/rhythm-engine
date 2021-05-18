@@ -29,7 +29,7 @@ const mapping: Record<
 }
 
 const config: EngineConfiguration = {
-  maxHitWindow: 100,
+  maxHitWindow: 50,
   timingWindows: [
     {
       name: 'fantastic',
@@ -111,7 +111,6 @@ window.logWorld = () => {
 const el = document.querySelector<HTMLDivElement>('.fantastic')!
 // @ts-ignore
 window.animate = () => {
-  console.log('remove')
   el.classList.remove('timing')
   void el.offsetWidth
   el.classList.add('timing')
@@ -132,6 +131,14 @@ export function gameLoop(world: UIWorld) {
     },
     config
   )
+
+  if (newGameState.previousFrameMeta.judgementResults.length) {
+    console.log(newGameState)
+    // some notes were judged on the previous window
+    // flash a timing!
+    // @ts-ignore
+    window.animate()
+  }
 
   for (const note of newGameState.chart.notes) {
     const yPos = world.shell.notes[note.id].ms + DELAY - world.core.time
@@ -155,7 +162,6 @@ export function gameLoop(world: UIWorld) {
 
   if (inputs.length) {
     updateDebug(newWorld)
-    console.log(newWorld)
     inputs = []
   }
 
