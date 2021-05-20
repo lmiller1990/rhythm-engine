@@ -94,7 +94,30 @@ function updateDebug(world: UIWorld) {
 
 let inputs: Input[] = []
 let playing = false
-const SPEED_MOD = 2
+const SPEED_MOD = 1.5
+
+const uiConfig = JSON.parse(
+  document.querySelector<HTMLDivElement>('#config')!.dataset['config'] || ''
+) as { noteWidth: number; noteHeight: number }
+
+const style = `
+.ui-note {
+  width: ${uiConfig.noteWidth}px;
+  height: ${uiConfig.noteHeight}px;
+}
+#chart-notes {
+  width: ${uiConfig.noteWidth * 4}px;
+  height: ${uiConfig.noteHeight}px;
+}
+.note-target {
+  width: ${uiConfig.noteWidth}px;
+}
+`
+
+const sheet = document.createElement('style')
+sheet.textContent = style
+document.body.append(sheet)
+
 // the larger this, the later the song will start playing.
 const GLOBAL_DELAY = 2100
 const MACHINE_DELAY = 100
@@ -109,15 +132,28 @@ window.logWorld = () => {
 }
 
 const el = document.querySelector<HTMLDivElement>('.fantastic')!
-// @ts-ignore
-window.animate = () => {
-  el.classList.remove('timing')
+
+window.timingFlash = (column: Column) => {
+  const sel = `[data-note-target-col="${column}"]`
+  const $col = document.querySelector(sel)!
+  $col.classList.remove('note-target-hl')
   void el.offsetWidth
-  el.classList.add('timing')
+  $col.classList.add('note-target-hl')
 }
+
+declare global {
+  interface Window {
+    timingFlash: (column: Column) => void
+  }
+}
+
 
 export function gameLoop(world: UIWorld) {
   const time = performance.now()
+  // if (time > 3000) {
+  //   return
+  // }
+
   if (!playing && time - world.core.offset >= GLOBAL_DELAY) {
     audio.play()
     playing = true
@@ -133,16 +169,26 @@ export function gameLoop(world: UIWorld) {
   )
 
   if (newGameState.previousFrameMeta.judgementResults.length) {
-    console.log(newGameState)
     // some notes were judged on the previous window
-    // flash a timing!
-    // @ts-ignore
-    window.animate()
+    for (const judgement of newGameState.previousFrameMeta.judgementResults) {
+      const note = newGameState.chart.notes.find(x => x.id === judgement.noteId)!
+      window.timingFlash(note.code as Column)
+    }
   }
 
   for (const note of newGameState.chart.notes) {
-    const yPos = world.shell.notes[note.id].ms + DELAY - world.core.time
-    world.shell.notes[note.id].$el.style.top = `${yPos / SPEED_MOD}px`
+    const theNote = world.core.chart.notes.find(x => x.id === note.id)
+    if (!theNote) {
+      // this should not happen
+      throw Error('Could not find note')
+    }
+
+    if (theNote.hitAt) {
+      world.shell.notes[note.id].$el.remove()
+    } else {
+      const yPos = world.shell.notes[note.id].ms + DELAY - world.core.time
+      world.shell.notes[note.id].$el.style.top = `${yPos / SPEED_MOD}px`
+    }
   }
 
   const newWorld: UIWorld = {
@@ -161,7 +207,7 @@ export function gameLoop(world: UIWorld) {
   state = newWorld
 
   if (inputs.length) {
-    updateDebug(newWorld)
+    // updateDebug(newWorld)
     inputs = []
   }
 
@@ -179,11 +225,26 @@ const notes: Record<string, UINote> = {}
 
 const $chart = document.querySelector('#chart-notes')!
 
+for (let i = 1; i < 5; i++) {
+  const $noteTarget = document.createElement('div')
+  $noteTarget.dataset.noteTargetCol = i.toString()
+  $noteTarget.className = 'note-target'
+  if (i === 1) {
+    $noteTarget.classList.add('note-target-first')
+  }
+
+  if (i === 4) {
+    $noteTarget.classList.add('note-target-last')
+  }
+
+  $chart.appendChild($noteTarget)
+}
+
 for (const note of gameChart.notes) {
   const $note = document.createElement('div')
   $note.className = 'ui-note'
   $note.style.top = `${Math.round((note.ms + DELAY) / SPEED_MOD)}px`
-  $note.style.left = `${(parseInt(note.code) - 1) * 25}px`
+  $note.style.left = `${(parseInt(note.code) - 1) * uiConfig.noteWidth}px`
   notes[note.id] = {
     ...note,
     $el: $note
@@ -226,7 +287,7 @@ document.querySelector('#start')!.addEventListener('click', () => {
       notes
     }
   }
-  updateDebug(world)
+  // updateDebug(world)
 
   requestAnimationFrame(() => gameLoop(world))
 })

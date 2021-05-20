@@ -9,13 +9,15 @@
   </head>
 
   <body>
+    <div id="config" data-config='{"noteWidth": 50, "noteHeight": 20}' />
     <button id="start">Start</button>
     <button id="end">End</button>
     <button onclick="logWorld()">Log world</button>
+    <div class="ui-note"></div>
     <div id="game">
       <div class="fantastic" style="position: absolute">Fantastic</div>
       <div id="chart-notes"></div>
-      <table id="debug">
+      <!-- <table id="debug">
         <thead>
           <tr id="debug-head">
             <th data-debugid="id">id</th>
@@ -29,7 +31,7 @@
         </thead>
         <tbody id="debug-body">
         </tbody>
-      </table>
+      </table> -->
     </div>
 
     <style>

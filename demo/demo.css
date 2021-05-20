@@ -1,29 +1,16 @@
 #game {
   display: flex;
   position: relative;
+  justify-content: center;
   height: 600px;
   border: 1px solid;
   overflow: hidden;
-}
-
-.note__timing {
-  margin: 0 5px 0 0;
-  width: 80px;
-}
-
-.note__timing--upper {
-  color: green;
-}
-
-.note__timing--lower {
-  color: red;
+  background: #000000e3;
 }
 
 .ui-note {
-  background: skyblue;
-  height: 15px;
+  background: gainsboro;
   position: absolute;
-  width: 15px;
 }
 
 .note {
@@ -44,7 +31,39 @@
 
 #chart-notes {
   position: relative;
-  background: black;
-  height: 1px;
-  width: 100px;
+  top: 50px;
+  display: flex;
+}
+
+:root {
+  --target-color: gainsboro;
+}
+.note-target {
+  border-top: 1px solid var(--target-color);
+  border-bottom: 1px solid var(--target-color);
+}
+
+.note-target:first-child {
+  border-left: 1px solid var(--target-color);
+}
+
+.note-target-first {
+  border-left: 1px solid var(--target-color);
+}
+
+.note-target-last {
+  border-right: 1px solid var(--target-color);
+}
+
+@keyframes target-flash {
+  0%   { 
+    box-shadow: 0px 0px 5px 5px white;
+  }
+  100% { 
+    box-shadow: none;
+  }
+}
+
+.note-target-hl {
+  animation: target-flash 0.5s;
 }
