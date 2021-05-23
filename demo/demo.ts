@@ -53,7 +53,8 @@ interface UIWorld {
 
 let inputs: Input[] = []
 let playing = false
-const SPEED_MOD = 1.5
+const SPEED_MOD_NORMALIZER = 4
+const SPEED_MOD = 1 / SPEED_MOD_NORMALIZER
 const SONG_END_ADDITIONAL_DELAY = 1000
 let nextAnimationFrameId: number
 
@@ -185,7 +186,7 @@ export function gameLoop(world: UIWorld) {
       world.shell.notes[note.id].$el.remove()
     } else {
       const yPos = world.shell.notes[note.id].ms + DELAY - world.core.time
-      world.shell.notes[note.id].$el.style.top = `${yPos / SPEED_MOD}px`
+      world.shell.notes[note.id].$el.style.top = `${yPos * SPEED_MOD}px`
     }
   }
 
@@ -250,7 +251,7 @@ function drawInitialNotes(gameChart: GameChart, $chart: HTMLDivElement) {
   for (const note of gameChart.notes) {
     const $note = document.createElement('div')
     $note.className = 'ui-note'
-    $note.style.top = `${Math.round((note.ms + DELAY) / SPEED_MOD)}px`
+    $note.style.top = `${Math.round((note.ms + DELAY) * SPEED_MOD)}px`
     $note.style.left = `${(parseInt(note.code) - 1) * uiConfig.noteWidth}px`
     notes[note.id] = {
       ...note,
