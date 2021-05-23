@@ -108,7 +108,9 @@ function selectTargetByColumn(column: Column) {
   const $col = document.querySelector<HTMLDivElement>(sel)
 
   if (!$col) {
-    throw Error(`Could not find column with number ${column}. Used querySelector([${sel}]).`)
+    throw Error(
+      `Could not find column with number ${column}. Used querySelector([${sel}]).`
+    )
   }
 
   return $col
