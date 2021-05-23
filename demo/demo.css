@@ -21,7 +21,7 @@
   width: 120px;
 }
 
-.fantastic {
+.perfect {
   color: lightseagreen;
   font-size: 3rem;
   font-family: 'Brush Script MT', cursive;
@@ -39,8 +39,41 @@
   --target-color: gainsboro;
 }
 .note-target {
+  position: relative;
   border-top: 1px solid var(--target-color);
   border-bottom: 1px solid var(--target-color);
+}
+
+.note-target-timing {
+  position: absolute;
+  top: -30px;
+  color: white;
+  transform: rotateX(90deg);
+}
+
+
+@keyframes target-timing {
+  0% {
+    transform: rotateX(0deg);
+  }
+
+  100% {
+    transform: rotateX(90deg);
+  }
+}
+
+:root {
+  --target-animation: target-timing 0.5s;
+}
+
+.timing-perfect {
+  color: lightskyblue;
+  animation: var(--target-animation);
+}
+
+.timing-great {
+  color: gold;
+  animation: var(--target-animation);
 }
 
 .note-target:first-child {

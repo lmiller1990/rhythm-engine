@@ -32,11 +32,11 @@ const config: EngineConfiguration = {
   maxHitWindow: 50,
   timingWindows: [
     {
-      name: 'fantastic',
-      windowMs: 50
+      name: 'perfect',
+      windowMs: 40
     },
     {
-      name: 'excellent',
+      name: 'great',
       windowMs: 100
     }
   ]
@@ -131,22 +131,25 @@ window.logWorld = () => {
   console.log(state)
 }
 
-const el = document.querySelector<HTMLDivElement>('.fantastic')!
+window.timingFlash = (payload: { column: Column, timingWindowName: string | undefined }) => {
+  const sel = `[data-note-target-col="${payload.column}"]`
+  const $col = document.querySelector<HTMLDivElement>(sel)!
 
-window.timingFlash = (column: Column) => {
-  const sel = `[data-note-target-col="${column}"]`
-  const $col = document.querySelector(sel)!
+  const $timing = document.createElement('div')
+  $timing.className = `note-target-timing timing-${payload.timingWindowName ?? ''}`
+  $timing.textContent = payload.timingWindowName ?? null
+
   $col.classList.remove('note-target-hl')
-  void el.offsetWidth
+  void $col.offsetWidth
   $col.classList.add('note-target-hl')
+  $col.appendChild($timing)
 }
 
 declare global {
   interface Window {
-    timingFlash: (column: Column) => void
+    timingFlash: (payload : { column: Column, timingWindowName: string | undefined }) => void
   }
 }
-
 
 export function gameLoop(world: UIWorld) {
   const time = performance.now()
@@ -171,13 +174,18 @@ export function gameLoop(world: UIWorld) {
   if (newGameState.previousFrameMeta.judgementResults.length) {
     // some notes were judged on the previous window
     for (const judgement of newGameState.previousFrameMeta.judgementResults) {
-      const note = newGameState.chart.notes.find(x => x.id === judgement.noteId)!
-      window.timingFlash(note.code as Column)
+      const note = newGameState.chart.notes.find(
+        (x) => x.id === judgement.noteId
+      )!
+      window.timingFlash({
+        column: note.code as Column,
+        timingWindowName: note.timingWindowName
+      })
     }
   }
 
   for (const note of newGameState.chart.notes) {
-    const theNote = world.core.chart.notes.find(x => x.id === note.id)
+    const theNote = world.core.chart.notes.find((x) => x.id === note.id)
     if (!theNote) {
       // this should not happen
       throw Error('Could not find note')
