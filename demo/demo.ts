@@ -4,17 +4,14 @@ import {
   initGameState,
   GameNote,
   Input,
-  EngineConfiguration
+  EngineConfiguration,
+  Chart
 } from '../dist'
 import { uberRave } from './charts'
 
 interface UINote extends GameNote {
   $el: HTMLDivElement
 }
-
-let end = false
-
-setTimeout(() => (end = true), 10000)
 
 export type Column = '1' | '2' | '3' | '4'
 
@@ -47,54 +44,18 @@ interface UIWorld {
     time: number
     chart: GameChart
     offset: number
+    timeOfLastNote: number | undefined
   }
   shell: {
     notes: Record<string, UINote>
   }
 }
 
-let first = true
-
-function updateDebug(world: UIWorld) {
-  const $body = document.querySelector('#debug-body')!
-  $body.innerHTML = ''
-  const hide = ['canHit', 'hitAt']
-
-  if (first) {
-    for (const attr of hide) {
-      const $th = document.querySelector(`[data-debugid="${attr}"]`)!
-      $th.remove()
-    }
-    first = false
-  }
-
-  for (const note of world.core.chart.notes) {
-    const $tr = document.createElement('tr')
-    for (const attr of [
-      'id',
-      'hitTiming',
-      'timingWindowName',
-      'code',
-      'ms',
-      'canHit',
-      'hitAt'
-    ]) {
-      if (hide.includes(attr)) {
-        continue
-      }
-
-      const $td = document.createElement('td')
-      // @ts-ignore
-      $td.innerText = note[attr]
-      $tr.append($td)
-    }
-    $body.append($tr)
-  }
-}
-
 let inputs: Input[] = []
 let playing = false
 const SPEED_MOD = 1.5
+const SONG_END_ADDITIONAL_DELAY = 1000
+let nextAnimationFrameId: number
 
 const uiConfig = JSON.parse(
   document.querySelector<HTMLDivElement>('#config')!.dataset['config'] || ''
@@ -131,23 +92,50 @@ window.logWorld = () => {
   console.log(state)
 }
 
-window.timingFlash = (payload: { column: Column, timingWindowName: string | undefined }) => {
-  const sel = `[data-note-target-col="${payload.column}"]`
-  const $col = document.querySelector<HTMLDivElement>(sel)!
+function targetFlash($el: HTMLDivElement) {
+  $el.classList.remove('note-target-hl')
+  void $el.offsetWidth
+  $el.classList.add('note-target-hl')
+}
+
+/**
+ * Select a target by column (1,2,3,4...)
+ * A target is just a HTMLDivElement with a
+ * data selector.
+ */
+function selectTargetByColumn(column: Column) {
+  const sel = `[data-note-target-col="${column}"]`
+  const $col = document.querySelector<HTMLDivElement>(sel)
+
+  if (!$col) {
+    throw Error(`Could not find column with number ${column}. Used querySelector([${sel}]).`)
+  }
+
+  return $col
+}
+
+window.timingFlash = (payload: {
+  column: Column
+  timingWindowName: string | undefined
+}) => {
+  const $col = selectTargetByColumn(payload.column)
 
   const $timing = document.createElement('div')
-  $timing.className = `note-target-timing timing-${payload.timingWindowName ?? ''}`
+  $timing.className = `note-target-timing timing-${
+    payload.timingWindowName ?? ''
+  }`
   $timing.textContent = payload.timingWindowName ?? null
 
-  $col.classList.remove('note-target-hl')
-  void $col.offsetWidth
-  $col.classList.add('note-target-hl')
+  targetFlash($col)
   $col.appendChild($timing)
 }
 
 declare global {
   interface Window {
-    timingFlash: (payload : { column: Column, timingWindowName: string | undefined }) => void
+    timingFlash: (payload: {
+      column: Column
+      timingWindowName: string | undefined
+    }) => void
   }
 }
 
@@ -199,8 +187,24 @@ export function gameLoop(world: UIWorld) {
     }
   }
 
+  // this is the amount of time that has passed since the
+  // first note has passed the targets.
+  // if this number is greater than the last note in the
+  // chart, the song has finished.
+  const passed = time - world.core.offset - DELAY
+
+  // if there is no timeOfLastNote, the song will play forever.
+  if (
+    world.core.timeOfLastNote &&
+    passed > world.core.timeOfLastNote + SONG_END_ADDITIONAL_DELAY
+  ) {
+    audio.pause()
+    return
+  }
+
   const newWorld: UIWorld = {
     core: {
+      timeOfLastNote: world.core.timeOfLastNote,
       offset: world.core.offset,
       time: performance.now() - world.core.offset,
       chart: {
@@ -214,24 +218,16 @@ export function gameLoop(world: UIWorld) {
 
   state = newWorld
 
+  // we already handled the inputs - clear them for the next frame.
   if (inputs.length) {
-    // updateDebug(newWorld)
     inputs = []
   }
-
-  if (end) {
-    audio.pause()
-    return
-  }
-
-  requestAnimationFrame(() => gameLoop(newWorld))
+  nextAnimationFrameId = requestAnimationFrame(() => gameLoop(newWorld))
 }
-
-const gameChart = initGameState(uberRave)
 
 const notes: Record<string, UINote> = {}
 
-const $chart = document.querySelector('#chart-notes')!
+const $chart = document.querySelector<HTMLDivElement>('#chart-notes')!
 
 for (let i = 1; i < 5; i++) {
   const $noteTarget = document.createElement('div')
@@ -248,16 +244,18 @@ for (let i = 1; i < 5; i++) {
   $chart.appendChild($noteTarget)
 }
 
-for (const note of gameChart.notes) {
-  const $note = document.createElement('div')
-  $note.className = 'ui-note'
-  $note.style.top = `${Math.round((note.ms + DELAY) / SPEED_MOD)}px`
-  $note.style.left = `${(parseInt(note.code) - 1) * uiConfig.noteWidth}px`
-  notes[note.id] = {
-    ...note,
-    $el: $note
+function drawInitialNotes(gameChart: GameChart, $chart: HTMLDivElement) {
+  for (const note of gameChart.notes) {
+    const $note = document.createElement('div')
+    $note.className = 'ui-note'
+    $note.style.top = `${Math.round((note.ms + DELAY) / SPEED_MOD)}px`
+    $note.style.left = `${(parseInt(note.code) - 1) * uiConfig.noteWidth}px`
+    notes[note.id] = {
+      ...note,
+      $el: $note
+    }
+    $chart.appendChild($note)
   }
-  $chart.appendChild($note)
 }
 
 function initKeydownListener(offset: number) {
@@ -269,33 +267,63 @@ function initKeydownListener(offset: number) {
     if (!code) {
       return
     }
+
+    const $target = selectTargetByColumn(code)
+    targetFlash($target)
+
     inputs.push({ ms: event.timeStamp - offset - DELAY, code })
   })
 }
 
 const audio = document.createElement('audio')
-document.querySelector('#end')!.addEventListener('click', () => {
-  end = true
+
+window.addEventListener('keydown', (event: KeyboardEvent) => {
+  if (event.code === 'KeyR') {
+    start()
+  }
 })
 
-document.querySelector('#start')!.addEventListener('click', () => {
+function start() {
+  if (nextAnimationFrameId) {
+    cancelAnimationFrame(nextAnimationFrameId)
+  }
   audio.volume = 0.1
   audio.src = '/resources/uber-rave.mp3'
+  playing = false
+  audio.pause()
+  audio.currentTime = 0
+
+  // initialize game state
+  const gameChart = initGameState(uberRave)
+
+  // clear existing notes (in case of song restart)
+  $chart.querySelectorAll('.ui-note').forEach((node) => node.remove())
+
+  drawInitialNotes(gameChart, $chart)
 
   const offset = performance.now()
+
+  // initialize inputs (for hitting notes)
   initKeydownListener(offset)
+
+  const timeOfLastNote =
+    gameChart.notes.sort((x, y) => y.ms - x.ms)?.[0]?.ms ?? undefined
 
   const world: UIWorld = {
     core: {
       time: 0,
       chart: gameChart,
-      offset
+      offset,
+      timeOfLastNote
     },
     shell: {
       notes
     }
   }
-  // updateDebug(world)
 
-  requestAnimationFrame(() => gameLoop(world))
+  nextAnimationFrameId = requestAnimationFrame(() => gameLoop(world))
+}
+
+document.querySelector('#start')!.addEventListener('click', () => {
+  start()
 })
