@@ -20,5 +20,8 @@
     "start:demo": "yarn serve demo",
     "test": "yarn jest",
     "lint": "prettier -c --parser typescript \"(src|demo|tests)/**/*.ts?(x)\" --write"
+  },
+  "dependencies": {
+    "snabbdom": "^3.0.1"
   }
 }

@@ -7,6 +7,7 @@ import {
   EngineConfiguration,
   Chart
 } from '../dist'
+import { createSongSelect } from './selectSong'
 import { uberRave } from './charts'
 
 interface UINote extends GameNote {
@@ -330,3 +331,5 @@ function start() {
 document.querySelector('#start')!.addEventListener('click', () => {
   start()
 })
+
+document.addEventListener('DOMContentLoaded', createSongSelect)
