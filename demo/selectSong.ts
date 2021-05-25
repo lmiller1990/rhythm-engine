@@ -8,13 +8,9 @@ import {
   attributesModule
 } from 'snabbdom'
 
-const container = document.getElementById('select-song')!
-
 const style = {
   songItemHeight: 20
 }
-
-const patch = init([classModule, propsModule, styleModule, attributesModule])
 
 interface Song {
   id: string
@@ -51,7 +47,10 @@ function createSongSelectRoot() {
   return h('div', { attrs: { id: 'select-song' } }, renderSongs())
 }
 
+const patch = init([classModule, propsModule, styleModule, attributesModule])
+
 export function createSongSelect() {
+  const container = document.getElementById('select-song')!
   vnode = createSongSelectRoot()
   patch(container, vnode)
 }

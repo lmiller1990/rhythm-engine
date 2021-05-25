@@ -1,5 +1,5 @@
-import { Chart, createChart } from '../dist'
-import { Column } from './demo'
+import { Chart, createChart } from '../src'
+import { Column } from './gameplay'
 
 const songOffset = 33
 // const machine = 100
