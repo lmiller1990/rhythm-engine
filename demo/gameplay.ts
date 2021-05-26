@@ -7,6 +7,7 @@ import {
   EngineConfiguration
 } from '../src'
 import { uberRave } from './charts'
+import { Song } from './selectSong'
 
 interface UINote extends GameNote {
   $el: HTMLDivElement
@@ -327,7 +328,6 @@ function start() {
 
   if (firstStart) {
     initInterface($chart)
-    audio = document.createElement('audio')
     firstStart = false
   }
 
@@ -336,7 +336,6 @@ function start() {
   }
 
   audio.volume = 0.1
-  audio.src = '/resources/uber-rave.mp3'
   playing = false
   audio.pause()
   audio.currentTime = 0
@@ -372,6 +371,14 @@ function start() {
   nextAnimationFrameId = requestAnimationFrame(() => gameLoop(world))
 }
 
-export function initializeGameplayEvents() {
-  start()
+export function initializeGameplayEvents(song: Song) {
+  audio = document.createElement('audio')
+  let hasStarted = false 
+  audio.addEventListener('canplaythrough', () => {
+    if (!hasStarted) {
+      hasStarted = true
+      start()
+    }
+  })
+  audio.src = `/resources/${song.src}`
 }

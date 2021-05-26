@@ -7,33 +7,42 @@ import {
   VNode,
   attributesModule
 } from 'snabbdom'
+import { initializeGameplayEvents } from './gameplay'
 
 const style = {
   songItemHeight: 20
 }
 
-interface Song {
+export interface Song {
   id: string
   name: string
+  src: string
 }
 
-let songs: Song[] = Array(20)
-  .fill(undefined)
-  .map((x, idx) => ({
-    id: (idx + 1).toString(),
-    name: `Song ${idx + 1}`
-  }))
+let songs: Song[] = [
+  { id: '1', name: 'Xepher', src: 'xepher.ogg' },
+  { id: '2', name: 'Red Zone', src: 'red_zone.ogg' },
+  { id: '3', name: 'Himawari', src: 'himawari.ogg' },
+  { id: '4', name: 'DoLL', src: 'doll.ogg' },
+  { id: '5', name: 'AA', src: 'AA.ogg' },
+  { id: '6', name: 'Uber Rave', src: 'uber-rave.mp3' },
+]
 
 let vnode: VNode
+let selectedSongId: string
 
 function renderSongs() {
   return songs.map((song) => {
     const index = songs.findIndex((x) => x.id === song.id)
+
     return h(
       'div',
       {
         key: song.id,
-        class: { 'song-select-song': true },
+        class: { 
+          'song-select-song': true ,
+          'song-select-selected': song.id === selectedSongId
+        },
         style: {
           top: `${index * style.songItemHeight}px`
         }
@@ -44,6 +53,7 @@ function renderSongs() {
 }
 
 function createSongSelectRoot() {
+  selectedSongId = songs[songs.length / 2].id
   return h('div', { attrs: { id: 'select-song' } }, renderSongs())
 }
 
@@ -57,6 +67,7 @@ export function createSongSelect() {
 
 function selectSong(direction: 'prev' | 'next') {
   songs = reorderList(songs, { direction })
+  selectedSongId = songs[songs.length / 2].id
   const newVnode = createSongSelectRoot()
   vnode = patch(vnode, newVnode)
 }
@@ -72,6 +83,15 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
 
   if (e.code === 'ArrowRight') {
     selectSong('next')
+  }
+
+  if (e.code === 'Enter') {
+    const song = songs.find(x => x.id === selectedSongId)
+    if (!song) {
+      throw Error(`Could not find selected song by id: ${selectedSongId}. This should never happen.`)
+    }
+
+    initializeGameplayEvents(song)
   }
 })
 
