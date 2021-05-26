@@ -10,7 +10,7 @@ import {
 import { initializeGameplayEvents } from './gameplay'
 
 const style = {
-  songItemHeight: 20
+  songItemHeight: 30
 }
 
 export interface Song {
