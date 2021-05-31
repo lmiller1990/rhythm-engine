@@ -113,7 +113,7 @@ export function judge(input: Input, note: ChartNote): number {
 }
 
 export interface GameChart {
-  notes: GameNote[]
+  notes: Map<string, GameNote>
 }
 
 /**
@@ -209,14 +209,17 @@ export function judgeInput({
  *  Create a new "world", which represents the play-through of one chart.
  */
 export function initGameState(chart: Chart): GameChart {
-  return {
-    notes: chart.notes.map((note) => {
-      return {
-        ...note,
-        timingWindowName: undefined,
-        canHit: true
-      }
+  const notes = new Map<string, GameNote>()
+  chart.notes.forEach(note => {
+    notes.set(note.id, {
+      ...note,
+      timingWindowName: undefined,
+      canHit: true
     })
+  })
+
+  return {
+    notes
   }
 }
 
@@ -227,6 +230,28 @@ interface PreviousFrameMeta {
 export interface UpdatedGameState {
   chart: GameChart
   previousFrameMeta: PreviousFrameMeta
+}
+
+function processNoteJudgement(
+  note: GameNote,
+  judgementResults: JudgementResult[]
+): GameNote {
+  if (!note.canHit || !judgementResults) {
+    return note
+  }
+
+  const noteJudgement = judgementResults.find((x) => x.noteId === note.id)
+  if (noteJudgement && noteJudgement.noteId === note.id) {
+    return {
+      ...note,
+      hitAt: noteJudgement.time,
+      canHit: false,
+      hitTiming: noteJudgement.timing,
+      timingWindowName: noteJudgement.timingWindowName
+    }
+  }
+
+  return note
 }
 
 /**
@@ -246,7 +271,7 @@ export function updateGameState(
     (acc, input) => {
       const result = judgeInput({
         input,
-        chart: world.chart,
+        chart: { notes: Array.from(world.chart.notes.values()) },
         maxWindow: config.maxHitWindow,
         timingWindows: config.timingWindows
       })
@@ -258,29 +283,17 @@ export function updateGameState(
     []
   )
 
+  const newNotes = new Map<string, GameNote>()
+  for (const key of world.chart.notes.keys()) {
+    newNotes.set(key, processNoteJudgement(world.chart.notes.get(key)!, judgementResults))
+  }
+
   return {
     previousFrameMeta: {
       judgementResults
     },
     chart: {
-      notes: world.chart.notes.map<GameNote>((note) => {
-        if (!note.canHit || !judgementResults) {
-          return note
-        }
-
-        const noteJudgement = judgementResults.find((x) => x.noteId === note.id)
-        if (noteJudgement && noteJudgement.noteId === note.id) {
-          return {
-            ...note,
-            hitAt: noteJudgement.time,
-            canHit: false,
-            hitTiming: noteJudgement.timing,
-            timingWindowName: noteJudgement.timingWindowName
-          }
-        }
-
-        return note
-      })
+      notes: newNotes
     }
   }
 }

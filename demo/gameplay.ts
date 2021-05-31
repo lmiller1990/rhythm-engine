@@ -56,7 +56,7 @@ const config: EngineConfiguration = {
   timingWindows: [
     {
       name: 'perfect',
-      windowMs: 40
+      windowMs: 50
     },
     {
       name: 'great',
@@ -139,10 +139,18 @@ window.timingFlash = (payload: {
   $col.appendChild($timing)
 }
 
+const perfMap: any[] = []
+// @ts-ignore
+window.perfMap = perfMap
+
 /**
  * The game loop! This is where literally everything happens.
  */
 export function gameLoop(world: UIWorld) {
+  let newFrameData: any = {
+    id: world.core.time
+  }
+
   const time = performance.now()
 
   if (!playing && time - world.core.offset >= GLOBAL_DELAY) {
@@ -150,6 +158,7 @@ export function gameLoop(world: UIWorld) {
     playing = true
   }
 
+  let timeToUpdate = performance.now()
   const newGameState = updateGameState(
     {
       time,
@@ -158,34 +167,42 @@ export function gameLoop(world: UIWorld) {
     },
     config
   )
+  timeToUpdate = performance.now() - timeToUpdate 
+  newFrameData.updateGameState = timeToUpdate
 
+  timeToUpdate = performance.now()
   if (newGameState.previousFrameMeta.judgementResults.length) {
     // some notes were judged on the previous window
     for (const judgement of newGameState.previousFrameMeta.judgementResults) {
-      const note = newGameState.chart.notes.find(
-        (x) => x.id === judgement.noteId
-      )!
+      const note = newGameState.chart.notes.get(judgement.noteId)
+      if (!note) {
+        throw Error(`Could not judged note with id ${judgement.noteId}. This should never happen.`)
+      }
       window.timingFlash({
         column: note.code as Column,
         timingWindowName: note.timingWindowName
       })
     }
   }
+  newFrameData.judgements = performance.now() - timeToUpdate
 
-  for (const note of newGameState.chart.notes) {
-    const theNote = world.core.chart.notes.find((x) => x.id === note.id)
+  timeToUpdate = performance.now()
+  for (const [id, theNote] of newGameState.chart.notes) {
     if (!theNote) {
       // this should not happen
       throw Error('Could not find note')
     }
 
     if (theNote.hitAt) {
-      world.shell.notes[note.id].$el.remove()
+      world.shell.notes[id].$el.remove()
     } else {
-      const yPos = world.shell.notes[note.id].ms + DELAY - world.core.time
-      world.shell.notes[note.id].$el.style.top = `${yPos * SPEED_MOD}px`
+      const yPos = world.shell.notes[id].ms + DELAY - world.core.time
+      if (yPos < 500) {
+        world.shell.notes[id].$el.style.top = `${yPos * SPEED_MOD}px`
+      }
     }
   }
+  newFrameData.draw = performance.now() - timeToUpdate
 
   // this is the amount of time that has passed since the
   // first note has passed the targets.
@@ -201,6 +218,8 @@ export function gameLoop(world: UIWorld) {
     audio.pause()
     return
   }
+
+  perfMap.push(newFrameData)
 
   const newWorld: UIWorld = {
     core: {
@@ -229,7 +248,7 @@ const notes: Record<string, UINote> = {}
 function drawInitialNotes(gameChart: GameChart, $chart: HTMLDivElement) {
   const uiConfig = getUiConfig()
 
-  for (const note of gameChart.notes) {
+  for (const [id, note] of gameChart.notes) {
     const $note = document.createElement('div')
     $note.className = 'ui-note'
     $note.style.top = `${Math.round((note.ms + DELAY) * SPEED_MOD)}px`
@@ -341,8 +360,16 @@ function start($chart: HTMLDivElement) {
   // initialize inputs (for hitting notes)
   initKeydownListener(offset)
 
-  const timeOfLastNote =
-    gameChart.notes.sort((x, y) => y.ms - x.ms)?.[0]?.ms ?? undefined
+  let timeOfLastNote: number | undefined
+  gameChart.notes.forEach(note => {
+    if (!timeOfLastNote) {
+      timeOfLastNote = note.ms
+    } else {
+      if (note.ms > timeOfLastNote) {
+        timeOfLastNote = note.ms
+      }
+    }
+  })
 
   const world: UIWorld = {
     core: {
