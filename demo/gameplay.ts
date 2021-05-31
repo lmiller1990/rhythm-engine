@@ -74,7 +74,7 @@ let nextAnimationFrameId: number
  * Scroll speed. Larger is faster.
  */
 const SPEED_MOD_NORMALIZER = 4
-const SPEED_MOD = 1 / SPEED_MOD_NORMALIZER
+const SPEED_MOD = 3 / SPEED_MOD_NORMALIZER
 
 /**
  * Amount of time to wait after the last note in the chart
@@ -262,7 +262,7 @@ function initKeydownListener(offset: number) {
 let audio: HTMLAudioElement
 
 window.addEventListener('keydown', (event: KeyboardEvent) => {
-  if (event.code === 'KeyR') {
+  if (event.code === 'KeyR' && playing) {
     const $chart = injectChartElement()
     start($chart)
   }
@@ -276,6 +276,7 @@ function getUiConfig() {
 
 export function initInterface($chart: HTMLDivElement) {
   const uiConfig = getUiConfig()
+  console.log($chart)
 
   // Create the targets.
   for (let i = 1; i < 5; i++) {
@@ -381,7 +382,6 @@ export function injectChartElement() {
   $chart.id = id
 
   let $old = document.getElementById(id)
-  console.log($old)
   if ($old) {
     $old.parentElement?.replaceChild($chart, $old)
   } else {

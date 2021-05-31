@@ -1,6 +1,7 @@
 node_modules
 dist
-resources
+resources/*.ogg
+resources/*.mp3
 demo/*.js
-!demo/rollup.config.js
+!demo/*config.js
 .DS_Store
