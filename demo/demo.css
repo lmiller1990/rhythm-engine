@@ -5,7 +5,7 @@
   height: 600px;
   border: 1px solid;
   overflow: hidden;
-  background: #000000e3;
+  background: black; 
 }
 
 .ui-note {
@@ -99,4 +99,30 @@
 
 .note-target-hl {
   animation: target-flash 0.5s;
+}
+
+/** Gameplay **/
+.timing {
+  --scale: 1.2;
+  transform: scaleX(var(--scale)) scaleY(var(--scale));
+  transition: 0.1s;
+  transform-origin: center center;
+}
+
+/** Select Song **/
+.song-select-song {
+  transition: 0.1s;
+  position: absolute;
+  width: 100%;
+  height: 30px;
+  background: lightskyblue;
+}
+
+.song-select-selected {
+  background: lightblue;
+}
+
+#select-song {
+  position: relative;
+  width: 300px;
 }

@@ -7,7 +7,7 @@ import {
   VNode,
   attributesModule
 } from 'snabbdom'
-import { initializeGameplayEvents } from './gameplay'
+import { initGameplayElements, initializeGameplayEvents } from './gameplay'
 
 const style = {
   songItemHeight: 30
@@ -19,13 +19,15 @@ export interface Song {
   src: string
 }
 
+export const uberRaveSong = { id: '6', name: 'Uber Rave', src: 'uber-rave.mp3' }
+
 let songs: Song[] = [
   { id: '1', name: 'Xepher', src: 'xepher.ogg' },
   { id: '2', name: 'Red Zone', src: 'red_zone.ogg' },
   { id: '3', name: 'Himawari', src: 'himawari.ogg' },
   { id: '4', name: 'DoLL', src: 'doll.ogg' },
   { id: '5', name: 'AA', src: 'AA.ogg' },
-  { id: '6', name: 'Uber Rave', src: 'uber-rave.mp3' },
+  uberRaveSong
 ]
 
 let vnode: VNode
@@ -39,8 +41,8 @@ function renderSongs() {
       'div',
       {
         key: song.id,
-        class: { 
-          'song-select-song': true ,
+        class: {
+          'song-select-song': true,
           'song-select-selected': song.id === selectedSongId
         },
         style: {
@@ -60,9 +62,11 @@ function createSongSelectRoot() {
 const patch = init([classModule, propsModule, styleModule, attributesModule])
 
 export function createSongSelect() {
-  const container = document.getElementById('select-song')!
+  const $selectSong = document.createElement('div')
+  $selectSong.id = 'select-song'
+  document.body.insertAdjacentElement('beforeend', $selectSong)
   vnode = createSongSelectRoot()
-  patch(container, vnode)
+  patch($selectSong, vnode)
 }
 
 function selectSong(direction: 'prev' | 'next') {
@@ -86,11 +90,14 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
   }
 
   if (e.code === 'Enter') {
-    const song = songs.find(x => x.id === selectedSongId)
+    const song = songs.find((x) => x.id === selectedSongId)
     if (!song) {
-      throw Error(`Could not find selected song by id: ${selectedSongId}. This should never happen.`)
+      throw Error(
+        `Could not find selected song by id: ${selectedSongId}. This should never happen.`
+      )
     }
 
+    initGameplayElements()
     initializeGameplayEvents(song)
   }
 })

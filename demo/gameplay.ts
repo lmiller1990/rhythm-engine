@@ -91,17 +91,6 @@ const MACHINE_DELAY = 100
 const DELAY = GLOBAL_DELAY + MACHINE_DELAY
 
 /**
- * The state is immutable and not really global,
- * it's just declared globally for convinient inspection via `window.logWorld`.
- */
-let state: UIWorld
-
-// @ts-ignore
-window.logWorld = () => {
-  console.log(state)
-}
-
-/**
  * Add a class to the targets to make it feel like
  * you "hit" them.
  * @param $el {HTMLDivElement} should be a target element
@@ -227,8 +216,6 @@ export function gameLoop(world: UIWorld) {
     }
   }
 
-  state = newWorld
-
   // we already handled the inputs - clear them for the next frame.
   if (inputs.length) {
     inputs = []
@@ -276,7 +263,8 @@ let audio: HTMLAudioElement
 
 window.addEventListener('keydown', (event: KeyboardEvent) => {
   if (event.code === 'KeyR') {
-    start()
+    const $chart = injectChartElement()
+    start($chart)
   }
 })
 
@@ -286,7 +274,7 @@ function getUiConfig() {
   ) as UIConfig
 }
 
-function initInterface($chart: HTMLDivElement) {
+export function initInterface($chart: HTMLDivElement) {
   const uiConfig = getUiConfig()
 
   // Create the targets.
@@ -310,7 +298,7 @@ function initInterface($chart: HTMLDivElement) {
   width: ${uiConfig.noteWidth}px;
   height: ${uiConfig.noteHeight}px;
 }
-#chart-notes {
+#${$chart.id} {
   width: ${uiConfig.noteWidth * 4}px;
   height: ${uiConfig.noteHeight}px;
 }
@@ -323,13 +311,12 @@ function initInterface($chart: HTMLDivElement) {
   document.body.append(sheet)
 }
 
-function start() {
-  const $chart = document.querySelector<HTMLDivElement>('#chart-notes')!
-
+function start($chart: HTMLDivElement) {
   if (firstStart) {
-    initInterface($chart)
     firstStart = false
   }
+
+  initInterface($chart)
 
   if (nextAnimationFrameId) {
     cancelAnimationFrame(nextAnimationFrameId)
@@ -371,14 +358,46 @@ function start() {
   nextAnimationFrameId = requestAnimationFrame(() => gameLoop(world))
 }
 
-export function initializeGameplayEvents(song: Song) {
+export function initGameplayElements() {
+  const $game = document.createElement('div')
+  $game.id = 'game'
+  const $chartNotes = document.createElement('div')
+  $chartNotes.id = 'chart-notes'
+  $game.appendChild($chartNotes)
+  document.body.insertAdjacentElement('afterbegin', $game)
+}
+
+export function initializeAudio(song: Song, onCanPlayThrough?: () => void) {
   audio = document.createElement('audio')
+  if (onCanPlayThrough) {
+     audio.addEventListener('canplaythrough', onCanPlayThrough)
+  }
+  audio.src = `/resources/${song.src}`
+}
+
+export function injectChartElement() {
+  const $chart = document.createElement('div')
+  const id = 'chart-notes'
+  $chart.id = id
+
+  let $old = document.getElementById(id)
+  console.log($old)
+  if ($old) {
+    $old.parentElement?.replaceChild($chart, $old)
+  } else {
+    document.body.insertAdjacentElement('afterbegin', $chart)
+  }
+
+  return $chart
+}
+
+export function initializeGameplayEvents(song: Song) {
   let hasStarted = false 
-  audio.addEventListener('canplaythrough', () => {
+  initializeAudio(song, () => {
     if (!hasStarted) {
       hasStarted = true
-      start()
+      const $chart = injectChartElement()
+      start($chart)
     }
   })
-  audio.src = `/resources/${song.src}`
 }
