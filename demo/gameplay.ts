@@ -212,26 +212,37 @@ export function gameLoop(world: UIWorld) {
   // if this number is greater than the last note in the
   // chart, the song has finished.
   const passed = time - world.core.offset - DELAY
-  const finished = world.core.timeOfLastNote &&
+  const finished =
+    world.core.timeOfLastNote &&
     passed > world.core.timeOfLastNote + SONG_END_ADDITIONAL_DELAY
 
-    if (passed > 7000) {
-    console.log(summarizeResults({
-      chart: world.core.chart,
-      time,
-      inputs: []
-    }, windows))
+  if (passed > 7000) {
+    console.log(
+      summarizeResults(
+        {
+          chart: world.core.chart,
+          time,
+          inputs: []
+        },
+        windows
+      )
+    )
     return
   }
 
   // if there is no timeOfLastNote, the song will play forever.
   if (finished) {
     audio.pause()
-    console.log(summarizeResults({
-      chart: world.core.chart,
-      time,
-      inputs: []
-    }, windows))
+    console.log(
+      summarizeResults(
+        {
+          chart: world.core.chart,
+          time,
+          inputs: []
+        },
+        windows
+      )
+    )
     return
   }
 

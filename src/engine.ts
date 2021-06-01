@@ -144,14 +144,14 @@ export interface JudgementResult {
   timingWindowName: string | undefined
 }
 
-/** 
+/**
  * timing is a number representing how close to the actual ms
- * the note was hit. 
+ * the note was hit.
  * A positive value represents early.
  * For example, timing = 110, desired time = 100, timing is +10.
  * A negative value represents early.
  * For example, timing = 90, desired time = 100, timing is -10.
- * 
+ *
  * timingWindows is an array of windows, always ordered from smallest to largest.
  */
 function getTimingWindow(

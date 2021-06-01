@@ -12,7 +12,10 @@ export interface Summary {
   }
 }
 
-export function summarizeResults(world: World, timingWindowNames: readonly string[]) {
+export function summarizeResults(
+  world: World,
+  timingWindowNames: readonly string[]
+) {
   const summary = timingWindowNames.reduce<Summary>(
     (acc, curr) => {
       return {
@@ -42,7 +45,7 @@ export function summarizeResults(world: World, timingWindowNames: readonly strin
       // it's a missed note
       if (note.hitAt === undefined) {
         summary.timing.miss.count += 1
-      } 
+      }
     }
 
     if (
@@ -50,7 +53,6 @@ export function summarizeResults(world: World, timingWindowNames: readonly strin
       timingWindowNames.includes(note.timingWindowName)
     ) {
       if (note.timingWindowName && !(note.timingWindowName in summary.timing)) {
-
         // should be impossible - defensive check.
         throw Error(
           `Tried to add note with timing ${
