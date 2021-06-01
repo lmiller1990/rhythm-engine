@@ -43,7 +43,11 @@ export function summarizeResults(
   for (const [id, note] of world.chart.notes) {
     if (!note.timingWindowName && !note.hitAt) {
       // it's a missed note
-      if (note.hitAt === undefined) {
+      // do not consider notes in the future - eg, we should support
+      // the use case of showing a summary if failing mid song, etc.
+      // note in the future are not considered "missed", since you
+      // never had a chance to hit them.
+      if (note.hitAt === undefined && note.ms < world.time) {
         summary.timing.miss.count += 1
       }
     }

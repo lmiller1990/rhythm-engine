@@ -55,4 +55,40 @@ describe('scoring', () => {
 
     expect(expected).toEqual(actual)
   })
+
+  it('does not count future notes as missed', () => {
+    const expected: Summary = {
+      timing: {
+        perfect: {
+          count: 0,
+          early: 0,
+          late: 0
+        },
+        great: {
+          count: 0,
+          early: 0,
+          late: 0
+        },
+        miss: {
+          count: 0,
+          early: 0,
+          late: 0
+        }
+      }
+    }
+
+    const world: World = {
+      chart: {
+        notes: new Map<string, GameNote>([
+          ['1', createNote('1', 200, undefined, undefined)]
+        ])
+      },
+      time: 100,
+      inputs: []
+    }
+
+    const actual = summarizeResults(world, ['perfect', 'great'])
+
+    expect(expected).toEqual(actual)
+  })
 })
