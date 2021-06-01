@@ -135,7 +135,7 @@ window.timingFlash = (payload: {
   }`
   $timing.textContent = payload.timingWindowName ?? null
 
-  targetFlash($col)
+  // targetFlash($col)
   $col.appendChild($timing)
 }
 
