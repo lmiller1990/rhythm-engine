@@ -210,7 +210,7 @@ export function judgeInput({
  */
 export function initGameState(chart: Chart): GameChart {
   const notes = new Map<string, GameNote>()
-  chart.notes.forEach(note => {
+  chart.notes.forEach((note) => {
     notes.set(note.id, {
       ...note,
       timingWindowName: undefined,
@@ -285,7 +285,10 @@ export function updateGameState(
 
   const newNotes = new Map<string, GameNote>()
   for (const key of world.chart.notes.keys()) {
-    newNotes.set(key, processNoteJudgement(world.chart.notes.get(key)!, judgementResults))
+    newNotes.set(
+      key,
+      processNoteJudgement(world.chart.notes.get(key)!, judgementResults)
+    )
   }
 
   return {

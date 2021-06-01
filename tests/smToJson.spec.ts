@@ -44,9 +44,7 @@ describe('toJsonChart', () => {
   it('transforms array of measures into a engine compatible chart', () => {
     // #OFFSET:-0.040;
     const offset = -40
-    const chart: Measure[] = [
-      ['1000', '0001', '0100', '0001'],
-    ]
+    const chart: Measure[] = [['1000', '0001', '0100', '0001']]
 
     const expected: Chart = {
       notes: [
@@ -88,9 +86,7 @@ describe('toJsonChart', () => {
   it('handles jumps/hands', () => {
     // #OFFSET:-0.040;
     const offset = -40
-    const chart: Measure[] = [
-      ['1001', '0000', '0000', '0000'],
-    ]
+    const chart: Measure[] = [['1001', '0000', '0000', '0000']]
 
     const expected: Chart = {
       notes: [
@@ -103,7 +99,7 @@ describe('toJsonChart', () => {
           id: '2',
           ms: 40,
           code: '4'
-        },
+        }
       ]
     }
 
@@ -121,7 +117,7 @@ describe('toJsonChart', () => {
     // #OFFSET:-0.040;
     const offset = -40
     const chart: Measure[] = [
-      ['1000', '0000', '0000', '0000', '1000', '0000', '0000', '0000'],
+      ['1000', '0000', '0000', '0000', '1000', '0000', '0000', '0000']
     ]
 
     const expected: Chart = {
@@ -135,7 +131,7 @@ describe('toJsonChart', () => {
           id: '2',
           ms: 726,
           code: '1'
-        },
+        }
       ]
     }
 
@@ -154,9 +150,23 @@ describe('toJsonChart', () => {
     const offset = -40
     const chart: Measure[] = [
       [
-        '1000', '0000', '0000', '0000', '0000', '0000', '0000', '0000',
-        '1000', '0000', '0000', '0000', '0000', '0000', '0000', '0000',
-      ],
+        '1000',
+        '0000',
+        '0000',
+        '0000',
+        '0000',
+        '0000',
+        '0000',
+        '0000',
+        '1000',
+        '0000',
+        '0000',
+        '0000',
+        '0000',
+        '0000',
+        '0000',
+        '0000'
+      ]
     ]
 
     const expected: Chart = {
@@ -170,7 +180,7 @@ describe('toJsonChart', () => {
           id: '2',
           ms: 726,
           code: '1'
-        },
+        }
       ]
     }
 

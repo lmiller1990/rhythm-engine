@@ -168,7 +168,7 @@ export function gameLoop(world: UIWorld) {
     },
     config
   )
-  timeToUpdate = performance.now() - timeToUpdate 
+  timeToUpdate = performance.now() - timeToUpdate
 
   timeToUpdate = performance.now()
   if (newGameState.previousFrameMeta.judgementResults.length) {
@@ -176,7 +176,9 @@ export function gameLoop(world: UIWorld) {
     for (const judgement of newGameState.previousFrameMeta.judgementResults) {
       const note = newGameState.chart.notes.get(judgement.noteId)
       if (!note) {
-        throw Error(`Could not judged note with id ${judgement.noteId}. This should never happen.`)
+        throw Error(
+          `Could not judged note with id ${judgement.noteId}. This should never happen.`
+        )
       }
       window.timingFlash({
         column: note.code as Column,
@@ -238,7 +240,7 @@ export function gameLoop(world: UIWorld) {
 
   loops += 1
 
-  if ((time - previousFrameTime) > 1000) {
+  if (time - previousFrameTime > 1000) {
     // it has been more than 1s between frames
     // report fps
     fps.push(loops)
@@ -251,7 +253,11 @@ export function gameLoop(world: UIWorld) {
 
 const notes: Record<string, UINote> = {}
 
-function $createNote(note: GameNote, uiConfig: UIConfig, $chart: HTMLDivElement): HTMLDivElement {
+function $createNote(
+  note: GameNote,
+  uiConfig: UIConfig,
+  $chart: HTMLDivElement
+): HTMLDivElement {
   const $note = document.createElement('div')
   $note.className = 'ui-note'
   $note.style.left = `${(parseInt(note.code) - 1) * uiConfig.noteWidth}px`
@@ -372,7 +378,7 @@ function start($chart: HTMLDivElement) {
   initKeydownListener(offset)
 
   let timeOfLastNote: number | undefined
-  gameChart.notes.forEach(note => {
+  gameChart.notes.forEach((note) => {
     if (!timeOfLastNote) {
       timeOfLastNote = note.ms
     } else {
@@ -409,7 +415,7 @@ export function initGameplayElements() {
 export function initializeAudio(song: Song, onCanPlayThrough?: () => void) {
   audio = document.createElement('audio')
   if (onCanPlayThrough) {
-     audio.addEventListener('canplaythrough', onCanPlayThrough)
+    audio.addEventListener('canplaythrough', onCanPlayThrough)
   }
   audio.src = `/resources/${song.src}`
 }
@@ -430,7 +436,7 @@ export function injectChartElement() {
 }
 
 export function initializeGameplayEvents(song: Song) {
-  let hasStarted = false 
+  let hasStarted = false
   initializeAudio(song, () => {
     if (!hasStarted) {
       hasStarted = true

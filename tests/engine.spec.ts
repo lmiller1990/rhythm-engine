@@ -218,7 +218,7 @@ describe('updateGameState', () => {
 
   it('updates the world given relative to given millseconds', () => {
     const notes = new Map<string, GameNote>()
-    notes.set(baseNote.id, {...baseNote, ms: 1000 })
+    notes.set(baseNote.id, { ...baseNote, ms: 1000 })
     // 900 ms has passed since game started
     const current: GameChart = {
       notes
@@ -244,7 +244,7 @@ describe('updateGameState', () => {
   it('update game state considering input', () => {
     // 900 ms has passed since game started
     const notes = new Map<string, GameNote>()
-    notes.set(baseNote.id, {...baseNote, ms: 1000, canHit: true })
+    notes.set(baseNote.id, { ...baseNote, ms: 1000, canHit: true })
     const current: GameChart = {
       notes
     }
@@ -322,7 +322,7 @@ describe('updateGameState', () => {
             '1',
             {
               ...alreadyHitNote,
-              id: '1',
+              id: '1'
             }
           ],
           [
