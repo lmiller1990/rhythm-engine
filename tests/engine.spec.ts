@@ -104,11 +104,11 @@ describe('judgeInput', () => {
       maxWindow: 100,
       timingWindows: [
         {
-          name: 'fantastic',
+          name: 'perfect',
           windowMs: 22
         },
         {
-          name: 'excellent',
+          name: 'great',
           windowMs: 33
         }
       ]
@@ -118,11 +118,11 @@ describe('judgeInput', () => {
       timing: 11,
       noteId: note.id,
       time: 111,
-      timingWindowName: 'fantastic'
+      timingWindowName: 'perfect'
     })
   })
 
-  it('considers timing windows when note is inside largest window', () => {
+  it('considers timing windows when note is early inside largest window', () => {
     const note: ChartNote = { id: '1', code: 'K', ms: 100 }
     const input: Input = {
       code: 'K',
@@ -134,11 +134,11 @@ describe('judgeInput', () => {
       maxWindow: 100,
       timingWindows: [
         {
-          name: 'fantastic',
+          name: 'perfect',
           windowMs: 10
         },
         {
-          name: 'excellent',
+          name: 'great',
           windowMs: 33
         }
       ]
@@ -148,7 +148,38 @@ describe('judgeInput', () => {
       timing: 11,
       noteId: note.id,
       time: 111,
-      timingWindowName: 'excellent'
+      timingWindowName: 'great'
+    })
+  })
+
+  it('considers timing windows when note is late inside largest window', () => {
+    const note: ChartNote = { id: '1', code: 'K', ms: 100 }
+    const input: Input = {
+      code: 'K',
+      ms: 89
+    }
+
+    const actual = judgeInput({
+      input,
+      chart: { notes: [note] },
+      maxWindow: 100,
+      timingWindows: [
+        {
+          name: 'perfect',
+          windowMs: 10
+        },
+        {
+          name: 'great',
+          windowMs: 33
+        }
+      ]
+    })
+
+    expect(actual).toEqual<JudgementResult>({
+      timing: -11,
+      noteId: note.id,
+      time: 89,
+      timingWindowName: 'great'
     })
   })
 
@@ -164,11 +195,11 @@ describe('judgeInput', () => {
       maxWindow: 100,
       timingWindows: [
         {
-          name: 'fantastic',
+          name: 'perfect',
           windowMs: 10
         },
         {
-          name: 'excellent',
+          name: 'great',
           windowMs: 20
         }
       ]

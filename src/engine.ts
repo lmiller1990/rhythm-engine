@@ -119,7 +119,7 @@ export interface GameChart {
 /**
  * Represents the current state of the game engine.
  */
-interface World {
+export interface World {
   // The chart selected.
   chart: GameChart
 
@@ -144,6 +144,16 @@ export interface JudgementResult {
   timingWindowName: string | undefined
 }
 
+/** 
+ * timing is a number representing how close to the actual ms
+ * the note was hit. 
+ * A positive value represents early.
+ * For example, timing = 110, desired time = 100, timing is +10.
+ * A negative value represents early.
+ * For example, timing = 90, desired time = 100, timing is -10.
+ * 
+ * timingWindows is an array of windows, always ordered from smallest to largest.
+ */
 function getTimingWindow(
   timing: number,
   timingWindows: TimingWindow[]
@@ -157,8 +167,9 @@ function getTimingWindow(
     // divide by 2 because a window of 22ms, for example, actually means
     // "+= 11ms either side of the note"
     const windowSize = timingWindows[i].windowMs / 2
+    const normalizedTiming = Math.abs(timing / 2)
 
-    if (timing <= windowSize) {
+    if (normalizedTiming <= windowSize) {
       return timingWindows[i]
     }
   }

@@ -4,7 +4,8 @@ import {
   initGameState,
   GameNote,
   Input,
-  EngineConfiguration
+  EngineConfiguration,
+  summarizeResults
 } from '../src'
 import { uberRave } from './charts'
 import { Song } from './selectSong'
@@ -51,15 +52,17 @@ const mapping: Record<
   Slash: '4'
 }
 
+const windows = ['perfect', 'great'] as const
+
 const config: EngineConfiguration = {
-  maxHitWindow: 50,
+  maxHitWindow: 100,
   timingWindows: [
     {
-      name: 'perfect',
+      name: windows[0],
       windowMs: 50
     },
     {
-      name: 'great',
+      name: windows[1],
       windowMs: 100
     }
   ]
@@ -209,13 +212,26 @@ export function gameLoop(world: UIWorld) {
   // if this number is greater than the last note in the
   // chart, the song has finished.
   const passed = time - world.core.offset - DELAY
+  const finished = world.core.timeOfLastNote &&
+    passed > world.core.timeOfLastNote + SONG_END_ADDITIONAL_DELAY
+
+    if (passed > 7000) {
+    console.log(summarizeResults({
+      chart: world.core.chart,
+      time,
+      inputs: []
+    }, windows))
+    return
+  }
 
   // if there is no timeOfLastNote, the song will play forever.
-  if (
-    world.core.timeOfLastNote &&
-    passed > world.core.timeOfLastNote + SONG_END_ADDITIONAL_DELAY
-  ) {
+  if (finished) {
     audio.pause()
+    console.log(summarizeResults({
+      chart: world.core.chart,
+      time,
+      inputs: []
+    }, windows))
     return
   }
 
