@@ -217,15 +217,17 @@ describe('updateGameState', () => {
   }
 
   it('updates the world given relative to given millseconds', () => {
+    const notes = new Map<string, GameNote>()
+    notes.set(baseNote.id, {...baseNote, ms: 1000 })
     // 900 ms has passed since game started
     const current: GameChart = {
-      notes: [{ ...baseNote, ms: 1000 }]
+      notes
     }
 
     // 50 ms has passed since last update
     const expected: UpdatedGameState = {
       chart: {
-        notes: [{ ...baseNote, ms: 1000 }]
+        notes
       },
       previousFrameMeta: {
         judgementResults: []
@@ -241,8 +243,10 @@ describe('updateGameState', () => {
 
   it('update game state considering input', () => {
     // 900 ms has passed since game started
+    const notes = new Map<string, GameNote>()
+    notes.set(baseNote.id, {...baseNote, ms: 1000, canHit: true })
     const current: GameChart = {
-      notes: [{ ...baseNote, ms: 1000, canHit: true }]
+      notes
     }
 
     // 50 ms has passed since last update
@@ -260,15 +264,12 @@ describe('updateGameState', () => {
         ]
       },
       chart: {
-        notes: [
-          {
-            ...baseNote,
-            ms: 1000,
-            canHit: false,
-            hitTiming: -60,
-            hitAt: 940
-          }
-        ]
+        notes: new Map([
+          [
+            baseNote.id,
+            { ...baseNote, ms: 1000, canHit: false, hitTiming: -60, hitAt: 940 }
+          ]
+        ])
       }
     }
 
@@ -299,24 +300,43 @@ describe('updateGameState', () => {
       hitTiming: -100
     }
 
+    const upcomingNote: GameNote = {
+      ...baseNote,
+      id: '2',
+      ms: 1000,
+      canHit: true
+    }
+
     const current: GameChart = {
-      notes: [alreadyHitNote, { ...baseNote, id: '2', ms: 1000, canHit: true }]
+      notes: new Map<string, GameNote>([
+        ['1', alreadyHitNote],
+        ['2', { ...upcomingNote }]
+      ])
     }
 
     // t = 950
     const expected: UpdatedGameState = {
       chart: {
-        notes: [
-          {
-            ...alreadyHitNote
-          },
-          {
-            ...current.notes[1],
-            canHit: false,
-            hitTiming: -50,
-            hitAt: 950
-          }
-        ]
+        notes: new Map<string, GameNote>([
+          [
+            '1',
+            {
+              ...alreadyHitNote,
+              id: '1',
+            }
+          ],
+          [
+            '2',
+            {
+              ...upcomingNote,
+              id: '2',
+              ms: 1000,
+              canHit: false,
+              hitTiming: -50,
+              hitAt: 950
+            }
+          ]
+        ])
       },
       previousFrameMeta: {
         judgementResults: [
@@ -357,7 +377,7 @@ describe('updateGameState', () => {
       hitTiming: 0
     }
     const current: GameChart = {
-      notes: [note]
+      notes: new Map<string, GameNote>([[note.id, note]])
     }
 
     const expected: UpdatedGameState = {
@@ -373,7 +393,7 @@ describe('updateGameState', () => {
         ]
       },
       chart: {
-        notes: [{ ...note }]
+        notes: new Map<string, GameNote>([[note.id, { ...note }]])
       }
     }
 
@@ -400,32 +420,38 @@ describe('updateGameState', () => {
       ms: 100
     }
     const current: GameChart = {
-      notes: [
-        { ...aNote, id: '1', code: 'J' },
-        { ...aNote, id: '2', code: 'K' }
-      ]
+      notes: new Map<string, GameNote>([
+        ['1', { ...aNote, id: '1', code: 'J' }],
+        ['2', { ...aNote, id: '2', code: 'K' }]
+      ])
     }
 
     const expected: UpdatedGameState = {
       chart: {
-        notes: [
-          {
-            ...aNote,
-            id: '1',
-            code: 'J',
-            hitAt: 100,
-            canHit: false,
-            hitTiming: 0
-          },
-          {
-            ...aNote,
-            id: '2',
-            code: 'K',
-            hitAt: 100,
-            canHit: false,
-            hitTiming: 0
-          }
-        ]
+        notes: new Map<string, GameNote>([
+          [
+            '1',
+            {
+              ...aNote,
+              id: '1',
+              code: 'J',
+              hitAt: 100,
+              canHit: false,
+              hitTiming: 0
+            }
+          ],
+          [
+            '2',
+            {
+              ...aNote,
+              id: '2',
+              code: 'K',
+              hitAt: 100,
+              canHit: false,
+              hitTiming: 0
+            }
+          ]
+        ])
       },
       previousFrameMeta: {
         judgementResults: [

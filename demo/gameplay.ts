@@ -74,7 +74,7 @@ let nextAnimationFrameId: number
  * Scroll speed. Larger is faster.
  */
 const SPEED_MOD_NORMALIZER = 4
-const SPEED_MOD = 3 / SPEED_MOD_NORMALIZER
+const SPEED_MOD = 2.5 / SPEED_MOD_NORMALIZER
 
 /**
  * Amount of time to wait after the last note in the chart
@@ -139,19 +139,20 @@ window.timingFlash = (payload: {
   $col.appendChild($timing)
 }
 
-const perfMap: any[] = []
-// @ts-ignore
-window.perfMap = perfMap
+let previousFrameTime: number
+let loops: number
+const fps: number[] = []
+const $fps = document.querySelector<HTMLDivElement>('#fps')!
 
 /**
  * The game loop! This is where literally everything happens.
  */
 export function gameLoop(world: UIWorld) {
-  let newFrameData: any = {
-    id: world.core.time
-  }
-
   const time = performance.now()
+
+  if (!previousFrameTime) {
+    previousFrameTime = time
+  }
 
   if (!playing && time - world.core.offset >= GLOBAL_DELAY) {
     audio.play()
@@ -168,7 +169,6 @@ export function gameLoop(world: UIWorld) {
     config
   )
   timeToUpdate = performance.now() - timeToUpdate 
-  newFrameData.updateGameState = timeToUpdate
 
   timeToUpdate = performance.now()
   if (newGameState.previousFrameMeta.judgementResults.length) {
@@ -184,7 +184,6 @@ export function gameLoop(world: UIWorld) {
       })
     }
   }
-  newFrameData.judgements = performance.now() - timeToUpdate
 
   timeToUpdate = performance.now()
   for (const [id, theNote] of newGameState.chart.notes) {
@@ -202,7 +201,6 @@ export function gameLoop(world: UIWorld) {
       }
     }
   }
-  newFrameData.draw = performance.now() - timeToUpdate
 
   // this is the amount of time that has passed since the
   // first note has passed the targets.
@@ -218,8 +216,6 @@ export function gameLoop(world: UIWorld) {
     audio.pause()
     return
   }
-
-  perfMap.push(newFrameData)
 
   const newWorld: UIWorld = {
     core: {
@@ -240,24 +236,39 @@ export function gameLoop(world: UIWorld) {
     inputs = []
   }
 
+  loops += 1
+
+  if ((time - previousFrameTime) > 1000) {
+    // it has been more than 1s between frames
+    // report fps
+    fps.push(loops)
+    $fps.textContent = fps.join(',')
+    loops = 0
+    previousFrameTime = time
+  }
   nextAnimationFrameId = requestAnimationFrame(() => gameLoop(newWorld))
 }
 
 const notes: Record<string, UINote> = {}
 
+function $createNote(note: GameNote, uiConfig: UIConfig, $chart: HTMLDivElement): HTMLDivElement {
+  const $note = document.createElement('div')
+  $note.className = 'ui-note'
+  $note.style.left = `${(parseInt(note.code) - 1) * uiConfig.noteWidth}px`
+  notes[note.id] = {
+    ...note,
+    $el: $note
+  }
+  $chart.appendChild($note)
+  return $note
+}
+
 function drawInitialNotes(gameChart: GameChart, $chart: HTMLDivElement) {
   const uiConfig = getUiConfig()
 
   for (const [id, note] of gameChart.notes) {
-    const $note = document.createElement('div')
-    $note.className = 'ui-note'
+    const $note = $createNote(note, uiConfig, $chart)
     $note.style.top = `${Math.round((note.ms + DELAY) * SPEED_MOD)}px`
-    $note.style.left = `${(parseInt(note.code) - 1) * uiConfig.noteWidth}px`
-    notes[note.id] = {
-      ...note,
-      $el: $note
-    }
-    $chart.appendChild($note)
   }
 }
 
