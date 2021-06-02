@@ -72,6 +72,7 @@ let inputs: Input[] = []
 let playing = false
 let firstStart = true
 let nextAnimationFrameId: number
+let endEarly = false
 
 /**
  * Scroll speed. Larger is faster.
@@ -203,7 +204,9 @@ export function gameLoop(world: UIWorld) {
       world.shell.notes[id].$el.remove()
     } else {
       const yPos = world.shell.notes[id].ms + DELAY - world.core.time
-      if (yPos < 500) {
+      // TODO: do this without hard coding some random arbitrary number
+      // This ensures we only update notes that are actually on the screen. It's an optimization.
+      if (yPos < (2500 / playerSpeedMod)) {
         world.shell.notes[id].$el.style.top = `${yPos * normalizedSpeedMod}px`
         world.shell.notes[id].$el.style.display = 'block'
       }
@@ -219,7 +222,7 @@ export function gameLoop(world: UIWorld) {
     world.core.timeOfLastNote &&
     passed > world.core.timeOfLastNote + SONG_END_ADDITIONAL_DELAY
 
-  if (passed > 7000) {
+  if (endEarly && passed > 7000) {
     console.log(
       summarizeResults(
         {
