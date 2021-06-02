@@ -22,11 +22,17 @@ export interface Song {
 export const uberRaveSong = { id: '6', name: 'Uber Rave', src: 'uber-rave.mp3' }
 
 let songs: Song[] = [
-  { id: '1', name: 'Xepher', src: 'xepher.ogg' },
-  { id: '2', name: 'Red Zone', src: 'red_zone.ogg' },
-  { id: '3', name: 'Himawari', src: 'himawari.ogg' },
-  { id: '4', name: 'DoLL', src: 'doll.ogg' },
-  { id: '5', name: 'AA', src: 'AA.ogg' },
+  // TODO: have more songs!
+  // { id: '1', name: 'Xepher', src: 'xepher.ogg' },
+  // { id: '2', name: 'Red Zone', src: 'red_zone.ogg' },
+  // { id: '3', name: 'Himawari', src: 'himawari.ogg' },
+  // { id: '4', name: 'DoLL', src: 'doll.ogg' },
+  // { id: '5', name: 'AA', src: 'AA.ogg' },
+  { ...uberRaveSong, id: '1'  },
+  { ...uberRaveSong, id: '2'  },
+  { ...uberRaveSong, id: '3'  },
+  { ...uberRaveSong, id: '4'  },
+  { ...uberRaveSong, id: '5'  },
   uberRaveSong
 ]
 

@@ -221,7 +221,7 @@ export function gameLoop(world: UIWorld) {
       summarizeResults(
         {
           chart: world.core.chart,
-          time,
+          time: passed,
           inputs: []
         },
         windows
