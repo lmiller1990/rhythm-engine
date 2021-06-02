@@ -126,3 +126,8 @@
   position: relative;
   width: 300px;
 }
+
+#speed-mod {
+  padding: 10px;
+  margin: 10px 0;
+}

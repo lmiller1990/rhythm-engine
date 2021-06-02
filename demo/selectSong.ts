@@ -3,11 +3,12 @@ import {
   classModule,
   styleModule,
   propsModule,
+  eventListenersModule,
   init,
   VNode,
   attributesModule
 } from 'snabbdom'
-import { initGameplayElements, initializeGameplayEvents } from './gameplay'
+import { DEFAULT_SPEED_MOD, initGameplayElements, initializeGameplayEvents } from './gameplay'
 
 const style = {
   songItemHeight: 30
@@ -28,11 +29,11 @@ let songs: Song[] = [
   // { id: '3', name: 'Himawari', src: 'himawari.ogg' },
   // { id: '4', name: 'DoLL', src: 'doll.ogg' },
   // { id: '5', name: 'AA', src: 'AA.ogg' },
-  { ...uberRaveSong, id: '1'  },
-  { ...uberRaveSong, id: '2'  },
-  { ...uberRaveSong, id: '3'  },
-  { ...uberRaveSong, id: '4'  },
-  { ...uberRaveSong, id: '5'  },
+  { ...uberRaveSong, id: '1' },
+  { ...uberRaveSong, id: '2' },
+  { ...uberRaveSong, id: '3' },
+  { ...uberRaveSong, id: '4' },
+  { ...uberRaveSong, id: '5' },
   uberRaveSong
 ]
 
@@ -60,12 +61,34 @@ function renderSongs() {
   })
 }
 
+let speedModVNode: VNode
+let speedMod = DEFAULT_SPEED_MOD.toString()
+
+function createSpeedModInputRoot() {
+  return h('input', {
+    props: { value: speedMod },
+    attrs: { placeholder: 'Enter speed mod', id: 'speed-mod' },
+    on: {
+      input: (event: Event) => {
+        speedMod = (event.currentTarget as HTMLInputElement).value
+      }
+    }
+  })
+}
+
 function createSongSelectRoot() {
   selectedSongId = songs[songs.length / 2].id
   return h('div', { attrs: { id: 'select-song' } }, renderSongs())
 }
 
-const patch = init([classModule, propsModule, styleModule, attributesModule])
+const patch = init([classModule, propsModule, styleModule, attributesModule, eventListenersModule])
+
+export function createSpeedModInput() {
+  const $mods = document.createElement('div')
+  document.body.insertAdjacentElement('beforeend', $mods)
+  speedModVNode = createSpeedModInputRoot()
+  patch($mods, speedModVNode)
+}
 
 export function createSongSelect() {
   const $selectSong = document.createElement('div')
@@ -104,7 +127,7 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
     }
 
     initGameplayElements()
-    initializeGameplayEvents(song)
+    initializeGameplayEvents(song, { speedMod: parseFloat(speedMod) })
   }
 })
 

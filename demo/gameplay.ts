@@ -77,7 +77,9 @@ let nextAnimationFrameId: number
  * Scroll speed. Larger is faster.
  */
 const SPEED_MOD_NORMALIZER = 4
-const SPEED_MOD = 2.5 / SPEED_MOD_NORMALIZER
+export const DEFAULT_SPEED_MOD = 2.5
+let playerSpeedMod: number
+let normalizedSpeedMod: number
 
 /**
  * Amount of time to wait after the last note in the chart
@@ -202,7 +204,8 @@ export function gameLoop(world: UIWorld) {
     } else {
       const yPos = world.shell.notes[id].ms + DELAY - world.core.time
       if (yPos < 500) {
-        world.shell.notes[id].$el.style.top = `${yPos * SPEED_MOD}px`
+        world.shell.notes[id].$el.style.top = `${yPos * normalizedSpeedMod}px`
+        world.shell.notes[id].$el.style.display = 'block'
       }
     }
   }
@@ -288,6 +291,8 @@ function $createNote(
   const $note = document.createElement('div')
   $note.className = 'ui-note'
   $note.style.left = `${(parseInt(note.code) - 1) * uiConfig.noteWidth}px`
+  // do not show until they are near the targets
+  $note.style.display = 'none'
   notes[note.id] = {
     ...note,
     $el: $note
@@ -300,8 +305,8 @@ function drawInitialNotes(gameChart: GameChart, $chart: HTMLDivElement) {
   const uiConfig = getUiConfig()
 
   for (const [id, note] of gameChart.notes) {
-    const $note = $createNote(note, uiConfig, $chart)
-    $note.style.top = `${Math.round((note.ms + DELAY) * SPEED_MOD)}px`
+    // TODO: Does this really need to be a separate function?
+    $createNote(note, uiConfig, $chart)
   }
 }
 
@@ -327,7 +332,7 @@ let audio: HTMLAudioElement
 window.addEventListener('keydown', (event: KeyboardEvent) => {
   if (event.code === 'KeyR' && playing) {
     const $chart = injectChartElement()
-    start($chart)
+    start($chart, { speedMod: playerSpeedMod })
   }
 })
 
@@ -375,7 +380,10 @@ export function initInterface($chart: HTMLDivElement) {
   document.body.append(sheet)
 }
 
-function start($chart: HTMLDivElement) {
+function start($chart: HTMLDivElement, gameplayOptions: GameplayOptions) {
+  playerSpeedMod = gameplayOptions.speedMod
+  normalizedSpeedMod = playerSpeedMod / SPEED_MOD_NORMALIZER
+
   if (firstStart) {
     firstStart = false
   }
@@ -462,13 +470,21 @@ export function injectChartElement() {
   return $chart
 }
 
-export function initializeGameplayEvents(song: Song) {
+interface GameplayOptions {
+  speedMod: number
+}
+
+export function initializeGameplayEvents(
+  song: Song,
+  { speedMod = 2.5 }: GameplayOptions
+) {
   let hasStarted = false
   initializeAudio(song, () => {
     if (!hasStarted) {
       hasStarted = true
       const $chart = injectChartElement()
-      start($chart)
+  console.log('ok')
+      start($chart, { speedMod })
     }
   })
 }
