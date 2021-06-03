@@ -147,7 +147,7 @@ window.timingFlash = (payload: {
 
 let previousFrameTime: number
 let loops: number
-const fps: number[] = []
+const fps: Array<{ frames: number, domElementCount: number }> = []
 const $fps = document.querySelector<HTMLDivElement>('#fps')!
 
 /**
@@ -276,8 +276,8 @@ export function gameLoop(world: UIWorld) {
   if (time - previousFrameTime > 1000) {
     // it has been more than 1s between frames
     // report fps
-    fps.push(loops)
-    $fps.textContent = fps.join(',')
+    fps.push({ frames: loops, domElementCount: document.querySelectorAll('*').length })
+    $fps.textContent = fps.map(x => JSON.stringify(x)).join(',')
     loops = 0
     previousFrameTime = time
   }
