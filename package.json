@@ -1,17 +1,16 @@
 {
-  "browser": "dist/rhythm-engine.browser.js",
-  "module": "dist/rhythm-engine.esm-bundler.js",
-  "main": "dist/index.js",
+  "module": "dist/engine.esm.js",
+  "main": "dist/engine.cjs.js",
+  "types": "dist",
   "devDependencies": {
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
-    "@types/events": "^3.0.0",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
     "rollup": "^2.33.3",
     "rollup-plugin-typescript2": "^0.29.0",
-    "rxjs": "6",
     "serve": "^11.3.2",
+    "snabbdom": "^3.0.1",
     "ts-jest": "^26.4.4",
     "ts-node": "^10.0.0",
     "typescript": "^4.1.2"
@@ -22,9 +21,5 @@
     "start:demo": "yarn serve demo",
     "test": "yarn jest",
     "lint": "prettier -c --parser typescript \"(src|demo|tests)/**/*.ts?(x)\" --write"
-  },
-  "dependencies": {
-    "events": "^3.3.0",
-    "snabbdom": "^3.0.1"
   }
 }
