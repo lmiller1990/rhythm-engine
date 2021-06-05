@@ -18,7 +18,8 @@ function createEntry(options) {
       })
     ],
     output: {
-      file: pkg.main
+      file: options.format === 'cjs' ? pkg.main : pkg.module,
+      format: options.format
     }
   }
 
@@ -27,6 +28,6 @@ function createEntry(options) {
 
 
 export default [
-  createEntry({ format: 'cjs', input: 'src/index.ts', output: 'engine.cjs.js' }),
-  createEntry({ format: 'esm', input: 'src/index.ts', output: 'engine.esm.js' }),
+  createEntry({ format: 'cjs', output: 'engine.cjs.js' }),
+  createEntry({ format: 'esm', output: 'engine.esm.js' }),
 ]
