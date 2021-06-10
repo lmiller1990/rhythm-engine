@@ -169,6 +169,7 @@ export function gameLoop(world: UIWorld) {
   const newGameState = updateGameState(
     {
       time,
+      startTime: 0,
       chart: world.core.chart,
       inputs
     },
@@ -228,7 +229,8 @@ export function gameLoop(world: UIWorld) {
         {
           chart: world.core.chart,
           time: passed,
-          inputs: []
+          inputs: [],
+          startTime: 0,
         },
         windows
       )
@@ -244,7 +246,8 @@ export function gameLoop(world: UIWorld) {
         {
           chart: world.core.chart,
           time,
-          inputs: []
+          inputs: [],
+          startTime: 0,
         },
         windows
       )

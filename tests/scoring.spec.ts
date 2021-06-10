@@ -48,6 +48,7 @@ describe('scoring', () => {
         ])
       },
       time: 10000,
+      startTime: 0,
       inputs: []
     }
 
@@ -84,6 +85,7 @@ describe('scoring', () => {
         ])
       },
       time: 100,
+      startTime: 0,
       inputs: []
     }
 

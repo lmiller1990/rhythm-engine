@@ -123,8 +123,12 @@ export interface World {
   // The chart selected.
   chart: GameChart
 
+  // startTime (for example from performance.now()) the game was initialized.
+  startTime: number
+
   // How fast we have progressed since the song started.
   time: number
+
 
   // Array of inputs made by the user.
   inputs: Input[]
