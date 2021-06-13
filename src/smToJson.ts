@@ -55,13 +55,9 @@ export function toJsonChart({
 
   for (const measure of measures) {
     const measureRelativeToStart = measureNumber * fourth * 4
-      // TODO: more generic...
-      const multiplier =
-        measure.length === 4
-          ? fourth
-          : measure.length === 8
-          ? eighth
-          : sixteenth
+    // TODO: more generic...
+    const multiplier =
+      measure.length === 4 ? fourth : measure.length === 8 ? eighth : sixteenth
 
     for (let row = 0; row < measure.length; row++) {
       const hasNote = measure[row].includes('1')

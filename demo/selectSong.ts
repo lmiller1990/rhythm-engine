@@ -8,7 +8,11 @@ import {
   VNode,
   attributesModule
 } from 'snabbdom'
-import { DEFAULT_SPEED_MOD, initGameplayElements, initializeGameplayEvents } from './gameplay'
+import {
+  DEFAULT_SPEED_MOD,
+  initGameplayElements,
+  initializeGameplayEvents
+} from './gameplay'
 
 const style = {
   songItemHeight: 30
@@ -81,7 +85,13 @@ function createSongSelectRoot() {
   return h('div', { attrs: { id: 'select-song' } }, renderSongs())
 }
 
-const patch = init([classModule, propsModule, styleModule, attributesModule, eventListenersModule])
+const patch = init([
+  classModule,
+  propsModule,
+  styleModule,
+  attributesModule,
+  eventListenersModule
+])
 
 export function createSpeedModInput() {
   const $mods = document.createElement('div')

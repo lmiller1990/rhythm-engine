@@ -129,7 +129,6 @@ export interface World {
   // How fast we have progressed since the song started.
   time: number
 
-
   // Array of inputs made by the user.
   inputs: Input[]
 }

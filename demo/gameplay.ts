@@ -147,7 +147,7 @@ window.timingFlash = (payload: {
 
 let previousFrameTime: number
 let loops: number
-const fps: Array<{ frames: number, domElementCount: number }> = []
+const fps: Array<{ frames: number; domElementCount: number }> = []
 const $fps = document.querySelector<HTMLDivElement>('#fps')!
 
 /**
@@ -207,7 +207,7 @@ export function gameLoop(world: UIWorld) {
       const yPos = world.shell.notes[id].ms + DELAY - world.core.time
       // TODO: do this without hard coding some random arbitrary number
       // This ensures we only update notes that are actually on the screen. It's an optimization.
-      if (yPos < (2500 / playerSpeedMod)) {
+      if (yPos < 2500 / playerSpeedMod) {
         world.shell.notes[id].$el.style.top = `${yPos * normalizedSpeedMod}px`
         world.shell.notes[id].$el.style.display = 'block'
       }
@@ -230,7 +230,7 @@ export function gameLoop(world: UIWorld) {
           chart: world.core.chart,
           time: passed,
           inputs: [],
-          startTime: 0,
+          startTime: 0
         },
         windows
       )
@@ -247,7 +247,7 @@ export function gameLoop(world: UIWorld) {
           chart: world.core.chart,
           time,
           inputs: [],
-          startTime: 0,
+          startTime: 0
         },
         windows
       )
@@ -279,8 +279,11 @@ export function gameLoop(world: UIWorld) {
   if (time - previousFrameTime > 1000) {
     // it has been more than 1s between frames
     // report fps
-    fps.push({ frames: loops, domElementCount: document.querySelectorAll('*').length })
-    $fps.textContent = fps.map(x => JSON.stringify(x)).join(',')
+    fps.push({
+      frames: loops,
+      domElementCount: document.querySelectorAll('*').length
+    })
+    $fps.textContent = fps.map((x) => JSON.stringify(x)).join(',')
     loops = 0
     previousFrameTime = time
   }
@@ -489,7 +492,7 @@ export function initializeGameplayEvents(
     if (!hasStarted) {
       hasStarted = true
       const $chart = injectChartElement()
-  console.log('ok')
+      console.log('ok')
       start($chart, { speedMod })
     }
   })
