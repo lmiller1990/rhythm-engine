@@ -1,6 +1,6 @@
 {
   "name": "@lmiller1990/rhythm-engine",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "module": "dist/engine.esm.js",
   "main": "dist/engine.cjs.js",
   "types": "dist",
