@@ -55,8 +55,6 @@ export function toJsonChart({
 
   for (const measure of measures) {
     const measureRelativeToStart = measureNumber * fourth * 4
-
-    for (let row = 0; row < measure.length; row++) {
       // TODO: more generic...
       const multiplier =
         measure.length === 4
@@ -65,6 +63,7 @@ export function toJsonChart({
           ? eighth
           : sixteenth
 
+    for (let row = 0; row < measure.length; row++) {
       const hasNote = measure[row].includes('1')
       const ms = Math.round(
         measureRelativeToStart + (row * multiplier - offset)

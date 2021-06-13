@@ -33,8 +33,8 @@ const chart = readChart(input) as Measure[]
 
 const asJson = toJsonChart({
   measures: chart,
-  offset: -50,
-  bpm: 170
+  offset: 0,
+  bpm: 175
 })
 
 const finalText = JSON.parse(JSON.stringify(asJson, null, 2))
