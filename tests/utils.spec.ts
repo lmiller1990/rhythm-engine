@@ -1,4 +1,5 @@
-import { prettyTimeElapsed } from '../src/utils'
+import { Chart } from '../src'
+import { prettyTimeElapsed, timeOfLastNote } from '../src/utils'
 
 type TestTuple = [number, string]
 
@@ -16,5 +17,36 @@ describe('prettyTimeElapsed', () => {
 
   it.each<TestTuple>(table)('works with %i', (ms: number, actual: string) => {
     expect(prettyTimeElapsed(ms)).toBe(actual)
+  })
+})
+
+
+describe('timeOfLastNote', () => {
+  it('returns time of last note' , () => {
+    const chart: Chart = {
+      notes: [
+        {
+          id: '1',
+          ms: 1,
+          code: 'A'
+        },
+        {
+          id: '2',
+          ms: 2,
+          code: 'A'
+        }
+      ]
+    }
+
+    expect(timeOfLastNote(chart)).toBe(2)
+  })
+
+  it('throws error of no notes in chart' , () => {
+    const chart: Chart = {
+      notes: [
+      ]
+    }
+
+    expect(() => timeOfLastNote(chart)).toThrowError(`No notes in chart!`)
   })
 })
